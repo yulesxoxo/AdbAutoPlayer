@@ -4,7 +4,7 @@
     let disableActions = false;
     let game: string | null = null;
     let games: string[] | null = null;
-    let buttons: { label: string, index: number }[] = [];
+    let buttons: { label: string, index: number, active: boolean }[] = [];
 
     function append_to_log(message: string) {
         const log = document.getElementById('log') as HTMLDivElement | null;
@@ -38,7 +38,7 @@
                 buttons = [];
 
                 if (games !== null) {
-                    buttons = games.map((gameName, index) => ({ label: gameName, index }));
+                    buttons = games.map((gameName, index) => ({ label: gameName, index, active: false }));
                 }
             }
         });
@@ -57,7 +57,6 @@
                 }
             });
         }
-
     }
 
     updateState();
@@ -65,6 +64,12 @@
 
     function executeMenuItem(event: Event, index: number) {
         event.preventDefault();
+        if (buttons) {
+            buttons = buttons.map((button, i) => ({
+                ...button,
+                active: i === index
+            }));
+        }
         disableActions = true;
         window.eel?.execute(index);
     }
@@ -80,8 +85,12 @@
 
     <CommandPanel title={"Menu"}>
         {#if buttons.length > 0}
-            {#each buttons as { label, index }}
-                <button disabled={disableActions} on:click={(event) => executeMenuItem(event, index)}>
+            {#each buttons as { label, index, active }}
+                <button
+                        disabled={disableActions}
+                        class:active={active}
+                        on:click={(event) => executeMenuItem(event, index)}
+                >
                     {label}
                 </button>
             {/each}
@@ -122,12 +131,18 @@
         padding: 10px 20px;
         font-size: 1em;
         cursor: pointer;
-        border: none;
         border-radius: 5px;
         transition: background-color 0.2s ease-in-out;
     }
 
+    button:disabled.active {
+        opacity: 1;
+        outline: 2px solid #396cd8;
+
+    }
+
     button:disabled {
         cursor: not-allowed;
+        opacity: 0.5;
     }
 </style>
