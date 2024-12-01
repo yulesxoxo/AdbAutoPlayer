@@ -1,7 +1,10 @@
 import logging
-import eel
+from multiprocessing import Queue
 from logging import StreamHandler, Formatter
+from logging.handlers import QueueHandler
 from typing import Any
+
+import eel
 
 # \033[97m White
 LOG_COLORS = {
@@ -13,6 +16,12 @@ LOG_COLORS = {
 }
 
 RESET_COLOR = "\033[0m"  # Reset to default color
+
+log_queue: Queue = Queue()  # type: ignore
+
+
+def get_log_queue() -> Queue:  # type: ignore
+    return log_queue
 
 
 class ColoredFormatter(logging.Formatter):
@@ -37,7 +46,7 @@ def setup_logging(level: int = logging.DEBUG) -> None:
     logger.setLevel(level)
 
     logger.addHandler(handler)
-    logger.propagate = False
+    logger.propagate = True
 
 
 def update_logging_from_config(config: dict[str, Any]) -> None:
@@ -54,7 +63,6 @@ class FrontendHandler(logging.Handler):
         log_entry = self.format(record)
         if "HTTP/" in log_entry:
             return None
-
         if hasattr(eel, "append_to_log"):
             eel.append_to_log(log_entry)
         return None
@@ -66,6 +74,11 @@ def enable_frontend_logs() -> None:
         fmt="[%(asctime)s] [%(levelname)s] %(message)s", datefmt="%H:%M:%S"
     )
     handler.setFormatter(formatter)
+
     logger = logging.getLogger()
-    logger.addHandler(handler)
+
+    queue_handler = QueueHandler(get_log_queue())
+    logger.addHandler(queue_handler)
+    listener = logging.handlers.QueueListener(log_queue, handler)
+    listener.start()
     logging.debug("Initialized Logging FrontendHandler")

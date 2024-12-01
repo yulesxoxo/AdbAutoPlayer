@@ -1,14 +1,17 @@
 import inspect
+import logging
+import multiprocessing.queues
 import sys
-import threading
+from logging.handlers import QueueHandler
+from multiprocessing import Process
 from typing import Any, NoReturn
 
 import eel
 from adbutils._device import AdbDevice
 
 import adb_auto_player.adb as adb
-import adb_auto_player.logger as logging
 import adb_auto_player.plugin_loader as plugin_loader
+from adb_auto_player import logging_setup
 from adb_auto_player.plugin import Plugin
 
 main_config = plugin_loader.get_main_config()
@@ -16,7 +19,7 @@ plugins = plugin_loader.load_plugin_configs()
 global_device: AdbDevice | None = None
 global_plugin: dict[str, Any] | None = None
 menu_options: list[dict[str, Any]] | None = None
-action_thread: threading.Thread | None = None
+action_process: Process | None = None
 
 
 def init() -> None:
@@ -98,7 +101,7 @@ def get_menu() -> list[str] | None:
 
 @eel.expose
 def execute(i: int) -> None:
-    global menu_options, action_thread
+    global action_process
     if global_plugin is None or menu_options is None:
         logging.warning("No plugin loaded")
         return None
@@ -110,22 +113,60 @@ def execute(i: int) -> None:
     option = menu_options[i]
     action = option.get("action")
     kwargs = option.get("kwargs")
+
     if callable(action) and isinstance(kwargs, dict):
-        action_thread = threading.Thread(target=action, kwargs=kwargs)
-        action_thread.daemon = True
-        action_thread.start()
+
+        action_process = Process(
+            target=run_action_in_process,
+            args=(
+                action.__name__,
+                kwargs,
+                logging_setup.get_log_queue(),
+                logging.getLogger().getEffectiveLevel(),
+            ),
+        )
+        action_process.daemon = True
+        action_process.start()
     else:
         logging.warning("Something went wrong executing the task")
-
     return None
+
+
+def run_action_in_process(
+    action: str,
+    kwargs: dict[str, Any],
+    log_queue: multiprocessing.Queue,  # type: ignore
+    log_level: int,
+) -> None:
+    print(type(action))
+    print(type(kwargs))
+    print(type(log_queue))
+    print(type(log_level))
+    child_logger = logging.getLogger()
+    child_logger.addHandler(QueueHandler(log_queue))
+    child_logger.setLevel(log_level)
+    game = get_game_object()
+    if hasattr(game, action):
+        action_func = getattr(game, action)
+        if callable(action_func):
+            action_func(**kwargs)
 
 
 @eel.expose
 def action_is_running() -> bool:
-    global action_thread
-    if action_thread is None:
+    global action_process
+    if action_process is None:
         return False
-    return action_thread.is_alive()
+    return action_process.is_alive()
+
+
+@eel.expose
+def stop_action() -> None:
+    global action_process
+    if action_process is not None and action_process.is_alive():
+        logging.warning("Stopping")
+        action_process.terminate()
+    return None
 
 
 @eel.expose
