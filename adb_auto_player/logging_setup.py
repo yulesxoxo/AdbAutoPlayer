@@ -17,10 +17,13 @@ LOG_COLORS = {
 
 RESET_COLOR = "\033[0m"  # Reset to default color
 
-log_queue: Queue = Queue()  # type: ignore
+log_queue: object | None = None
 
 
-def get_log_queue() -> Queue:  # type: ignore
+def get_log_queue() -> object:
+    global log_queue
+    if log_queue is None:
+        log_queue = Queue()
     return log_queue
 
 
@@ -77,8 +80,8 @@ def enable_frontend_logs() -> None:
 
     logger = logging.getLogger()
 
-    queue_handler = QueueHandler(get_log_queue())
+    queue_handler = QueueHandler(get_log_queue())  # type: ignore
     logger.addHandler(queue_handler)
-    listener = logging.handlers.QueueListener(log_queue, handler)
+    listener = logging.handlers.QueueListener(get_log_queue(), handler)  # type: ignore
     listener.start()
     logging.debug("Initialized Logging FrontendHandler")
