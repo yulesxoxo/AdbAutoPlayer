@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import sys
 from typing import NoReturn
@@ -58,6 +59,7 @@ def __start_eel() -> None:
 
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main_config = plugin_loader.get_main_config()
     update_logging_from_config(main_config)
     enable_frontend_logs()

@@ -9,7 +9,13 @@ a = Analysis(
         ('pyproject.toml', '.'),
         ('adb_auto_player/frontend/build', './frontend/build')
     ],
-    hiddenimports=['adb_auto_player.plugin', 'bottle_websocket'],
+    hiddenimports=[
+        'adb_auto_player.plugin',
+        'bottle_websocket',
+        '_socket',
+        'unicodedata',
+        'eel'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

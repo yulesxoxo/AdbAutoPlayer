@@ -1,3 +1,5 @@
+import multiprocessing
+
 import adb_auto_player.logger as logging
 
 import adb_auto_player.adb as adb
@@ -8,6 +10,7 @@ from adb_auto_player.logging_setup import update_logging_from_config, setup_logg
 setup_logging()
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main_config = plugin_loader.get_main_config()
     update_logging_from_config(main_config)
     update_manager.version_updater()

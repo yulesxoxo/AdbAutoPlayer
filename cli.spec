@@ -8,7 +8,13 @@ a = Analysis(
     datas=[
         ('pyproject.toml', '.')
     ],
-    hiddenimports=['adb_auto_player.plugin'],
+    hiddenimports=[
+        'adb_auto_player.plugin',
+        'bottle_websocket',
+        '_socket',
+        'unicodedata',
+        'eel'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
