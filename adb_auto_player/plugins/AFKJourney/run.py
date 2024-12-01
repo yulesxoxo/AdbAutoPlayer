@@ -398,6 +398,11 @@ class AFKJourney(Plugin):
 
     def __navigate_to_duras_trials_screen(self) -> None | NoReturn:
         logging.info("Navigating to Dura's Trial select")
+        notice = self.find_first_template_center("notice.png")
+        if notice is not None:
+            self.device.click(530, 1630)
+            sleep(3)
+
         while True:
             result = self.find_any_template_center(
                 ["time_of_day.png", "rate_up.png"], grayscale=True
