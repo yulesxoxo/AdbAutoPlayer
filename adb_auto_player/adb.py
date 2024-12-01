@@ -1,6 +1,6 @@
 from typing import Any, NoReturn
 
-from adbutils import AdbClient
+from adbutils import AdbClient, AdbDeviceInfo
 from adbutils._device import AdbDevice
 
 import adb_auto_player.logger as logging
@@ -37,6 +37,15 @@ def get_device(main_config: dict[str, Any]) -> AdbDevice | NoReturn:
         return device
     except Exception as e:
         logging.critical_and_exit(f"Failed to connect to device: {e}")
+
+
+def get_devices(main_config: dict[str, Any]) -> list[AdbDeviceInfo]:
+    adb_config = main_config.get("adb", {})
+    client = AdbClient(
+        host=adb_config.get("host", "127.0.0.1"),
+        port=adb_config.get("port", 5037),
+    )
+    return client.list()
 
 
 def get_currently_running_app(device: AdbDevice) -> str | NoReturn:
