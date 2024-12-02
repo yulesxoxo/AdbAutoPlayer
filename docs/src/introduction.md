@@ -2,6 +2,7 @@
 
 AdbAutoPlayer is a tool designed to automate repetitive tasks and dailies in Android games. It uses [**ADB (Android Debug Bridge)**](https://developer.android.com/tools/adb) to interact with your Android device or emulator.  
 ![app.png](images/app/app.png)
+
 ---
 
 ## Compatibility
