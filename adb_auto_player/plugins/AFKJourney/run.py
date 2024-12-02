@@ -242,6 +242,8 @@ class AFKJourney(Plugin):
         sleep(1)
 
         if self.find_first_template_center("spend.png") and not spend_gold:
+            logging.warning("Not spending gold returning.")
+            self.press_back_button()
             return False
 
         self.__click_confirm_on_popup()
