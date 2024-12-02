@@ -30,28 +30,50 @@ Configuration is only loaded once when the App starts you need to restart it to 
 ---
 
 ### [afk_stages]
-
-- **formations**: Defines the number of suggested formations to copy.
-  - Min value: `1`
-  - Max value: `7`
+> **Note**: If a setting does not exist for a mode it will always use the afk_stages config as default!
 
 - **attempts**: Specifies how many times to attempt each formation.
-  - Min value: `1`
-  - Max value: `100`
+  - Min: `1`
+  - Max: `100`
+  - Default: `5`
+
+- **formations**: Defines the number of suggested formations to copy.
+  - Min: `1`
+  - Max: `7`
+  - Default: `7`
+
+- **use_suggested_formations**: 
+  - `true`: Uses suggested formations from the `Records` button.
+  - `false`: Uses your currently setup formation.
+  - Default: `true`
 
 - **push_both_modes**: If set to `true`, the app will try the other mode after failing all attempts on all formations.
+  - Default: `true`
 
 ---
 
 ### [duras_trials]
 
-- **spend_gold**: 
-  - `false`: Gold will not be spent to keep retrying the trials.
-  - `true`: Gold will be spent to continue retrying after failure.
+- **attempts**: Specifies how many times to attempt each formation.
+  - Min: `1`
+  - Max: `100`
+  - Default: `5`
+
+- **formations**: Defines the number of suggested formations to copy.
+  - Min: `1`
+  - Max: `7`
+  - Default: `7`
 
 - **use_suggested_formations**: 
-  - `false`: Uses your currently setup formation.
   - `true`: Uses suggested formations from the `Records` button.
+  - `false`: Uses your currently setup formation.
+  - Default: `true`
+
+- **spend_gold**: 
+  - `true`: Gold will be spent to continue retrying after failure.
+  - `true`: Gold will be spent to continue retrying after failure.
+  - `false`: Gold will not be spent to keep retrying the trials.
+  - Default: `false`
 
 ---
 
