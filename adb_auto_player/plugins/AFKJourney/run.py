@@ -12,7 +12,13 @@ from adb_auto_player.plugin_loader import get_plugins_dir
 class AFKJourney(Plugin):
     BATTLE_TIMEOUT: int = 180
     STORE_SEASON: str = "SEASON"
+    STORE_MODE: str = "MODE"
+    MODE_DURAS_TRIALS: str = "DURAS_TRIALS"
+    MODE_AFK_STAGES: str = "AFK_STAGES"
     STORE_MAX_ATTEMPTS_REACHED: str = "MAX_ATTEMPTS_REACHED"
+    CONFIG_GENERAL: str = "general"
+    CONFIG_AFK_STAGES: str = "afk_stages"
+    CONFIG_DURAS_TRIALS: str = "duras_trials"
 
     def get_template_dir_path(self) -> str:
         return os.path.join(get_plugins_dir(), "AFKJourney", "templates")
@@ -44,7 +50,7 @@ class AFKJourney(Plugin):
                 "action": self.handle_battle_screen,
                 "kwargs": {"use_suggested_formations": False},
             },
-            # I already finished this so I can't test to implement it.
+            # I already finished this, so I can't test to implement it.
             # {
             #    "label": "Season Legend Trial",
             #    "action": self.push_season_legend_trials,
@@ -58,27 +64,37 @@ class AFKJourney(Plugin):
         )
         return excluded_heroes
 
-    def get_afk_stage_config(self) -> tuple[int, int, bool]:
-        formations = int(self.config.get("afk_stages", {}).get("formations", 7))
-        formations = min(formations, 7)
-        formations = max(formations, 1)
+    def get_afk_stage_config(self) -> tuple[int, int, bool, bool]:
+        config = self.config.get(self.CONFIG_AFK_STAGES, {})
 
-        attempts = int(self.config.get("afk_stages", {}).get("attempts", 5))
+        attempts = int(config.get("attempts", 5))
         attempts = min(attempts, 100)
         attempts = max(attempts, 1)
 
-        push_both_modes = bool(
-            self.config.get("afk_stages", {}).get("push_both_modes", True)
-        )
-        return formations, attempts, push_both_modes
+        formations = int(config.get("formations", 7))
+        formations = min(formations, 7)
+        formations = max(formations, 1)
 
-    def get_duras_trials_config(self) -> tuple[bool, bool]:
-        spend_gold = bool(self.config.get("duras_trials", {}).get("spend_gold", False))
-        use_suggested_formations = bool(
-            self.config.get("duras_trials", {}).get("use_suggested_formations", True)
-        )
+        use_suggested_formations = bool(config.get("use_suggested_formations", True))
 
-        return spend_gold, use_suggested_formations
+        push_both_modes = bool(config.get("push_both_modes", True))
+        return attempts, formations, use_suggested_formations, push_both_modes
+
+    def get_duras_trials_config(self) -> tuple[int, int, bool, bool]:
+        config = self.config.get(self.CONFIG_DURAS_TRIALS, {})
+
+        attempts = int(config.get("attempts", 5))
+        attempts = min(attempts, 100)
+        attempts = max(attempts, 1)
+
+        formations = int(config.get("formations", 7))
+        formations = min(formations, 7)
+        formations = max(formations, 1)
+
+        spend_gold = bool(config.get("spend_gold", False))
+        use_suggested_formations = bool(config.get("use_suggested_formations", True))
+
+        return attempts, formations, use_suggested_formations, spend_gold
 
     def handle_battle_screen(
         self, use_suggested_formations: bool = True
@@ -88,7 +104,10 @@ class AFKJourney(Plugin):
         :param use_suggested_formations: if False use suggested formations from records
         :return:
         """
-        formations, _, _ = self.get_afk_stage_config()
+        if self.store.get(self.STORE_MODE, None) == self.MODE_DURAS_TRIALS:
+            _, formations, _, _ = self.get_duras_trials_config()
+        else:
+            _, formations, _, _ = self.get_afk_stage_config()
         formation_num: int = 0
         if not use_suggested_formations:
             logging.info("Not using suggested Formations")
@@ -183,7 +202,10 @@ class AFKJourney(Plugin):
         return excluded_heroes.get(template)
 
     def __handle_multi_stage(self) -> bool | NoReturn:
-        _, attempts, _ = self.get_afk_stage_config()
+        if self.store.get(self.STORE_MODE, None) == self.MODE_DURAS_TRIALS:
+            attempts, _, _, _ = self.get_duras_trials_config()
+        else:
+            attempts, _, _, _ = self.get_afk_stage_config()
         count: int = 0
         count_stage_2: int = 0
 
@@ -240,7 +262,7 @@ class AFKJourney(Plugin):
                         return False
 
     def start_battle(self) -> bool | NoReturn:
-        spend_gold, _ = self.get_duras_trials_config()
+        _, _, _, spend_gold = self.get_duras_trials_config()
 
         self.wait_for_template("records.png")
         self.device.click(850, 1780)
@@ -276,9 +298,11 @@ class AFKJourney(Plugin):
         self.device.click(*confirm)
 
     def __handle_single_stage(self) -> bool | NoReturn:
-        _, attempts, _ = self.get_afk_stage_config()
+        if self.store.get(self.STORE_MODE, None) == self.MODE_DURAS_TRIALS:
+            attempts, _, _, _ = self.get_duras_trials_config()
+        else:
+            attempts, _, _, _ = self.get_afk_stage_config()
         count: int = 0
-
         while count < attempts:
             count += 1
 
@@ -304,8 +328,9 @@ class AFKJourney(Plugin):
         Entry for pushing AFK Stages
         :param season: Push Season Stage if True otherwise push regular AFK Stages
         """
-        _, _, push_both_modes = self.get_afk_stage_config()
+        _, _, _, push_both_modes = self.get_afk_stage_config()
         self.store[self.STORE_SEASON] = season
+        self.store[self.STORE_MODE] = self.MODE_AFK_STAGES
 
         self.__start_afk_stage()
         if push_both_modes:
@@ -371,6 +396,7 @@ class AFKJourney(Plugin):
         Entry for pushing Dura's Trials
         :return:
         """
+        self.store[self.STORE_MODE] = self.MODE_DURAS_TRIALS
         self.__navigate_to_duras_trials_screen()
 
         self.wait_for_template("rate_up.png", grayscale=True)
@@ -435,7 +461,7 @@ class AFKJourney(Plugin):
         return None
 
     def __handle_dura_screen(self, x: int, y: int) -> None | NoReturn:
-        _, use_suggested_formations = self.get_duras_trials_config()
+        _, _, use_suggested_formations, _ = self.get_duras_trials_config()
         # y+100 clicks closer to center of the button instead of rate up text
         self.device.click(x, y + 100)
         template, x, y = self.wait_for_any_template(["battle.png", "sweep.png"])
