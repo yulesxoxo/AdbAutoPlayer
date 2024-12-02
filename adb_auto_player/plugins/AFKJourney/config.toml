@@ -1,20 +1,20 @@
 [general]
 excluded_heroes = [
     #Hashtag before the name "comments out" the line so it is not applied.
-    #"Arden",
-    #"Berial",
-    #"Carolina",
-    #"Dionel", "Dunlingr",
+    #"Alsa", "Antandra", "Arden",
+    #"Berial", "Brutus", "Bryon",
+    #"Carolina", "Cecia",
+    #"Damian", "Dionel", "Dunlingr",
     #"Eironn",
     #"Fae", "Florabelle",
     #"Harak", "Hewynn", "Hodgkin",
-    #"Kafra", "Korin",
+    #"Kafra", "Koko", "Korin",
     #"Lenya", "Lily May", "Lucca", "Lucius", "Ludovic", "Lumont",
-    #"Mikola",
+    #"Marilee", "Mikola",
     #"Nara",
-    #"Rowan",
+    #"Reinier", "Rowan",
     #"Phraesto",
-    #"Scarlita", "Sinbad", "Smokey", "Sonja", "Soren",
+    #"Scarlita", "Shakir", "Sinbad", "Smokey", "Sonja", "Soren",
     #"Talene", "Tasi", "Temesia",
     #"Ulmus",
     #"Valen",
@@ -22,13 +22,16 @@ excluded_heroes = [
 ]
 
 [afk_stages]
-formations = 7
 attempts = 5
+formations = 7
+use_suggested_formations = true
 push_both_modes = true
 
 [duras_trials]
-spend_gold = false
+attempts = 2
+formations = 7
 use_suggested_formations = true
+spend_gold = false
 
 [plugin]
 name = 'AFK Journey'
