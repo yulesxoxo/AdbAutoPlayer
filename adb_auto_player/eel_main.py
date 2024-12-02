@@ -18,7 +18,8 @@ from adb_auto_player.logging_setup import (
 
 setup_logging()
 cmdline_args = [
-    "--disk-cache-dir=/dev/null" "--disable-extensions",
+    "--disk-cache-dir=/dev/null",
+    "--disable-extensions",
     "-–incognito",
     "--disable-application-cache",
 ]
