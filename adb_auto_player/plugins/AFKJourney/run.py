@@ -83,7 +83,7 @@ class AFKJourney(Plugin):
     def get_duras_trials_config(self) -> tuple[int, int, bool, bool]:
         config = self.config.get(self.CONFIG_DURAS_TRIALS, {})
 
-        attempts = int(config.get("attempts", 5))
+        attempts = int(config.get("attempts", 2))
         attempts = min(attempts, 100)
         attempts = max(attempts, 1)
 

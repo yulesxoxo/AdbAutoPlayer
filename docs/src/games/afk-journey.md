@@ -57,7 +57,7 @@ Configuration is only loaded once when the App starts you need to restart it to 
 - **attempts**: Specifies how many times to attempt each formation.
   - Min: `1`
   - Max: `100`
-  - Default: `5`
+  - Default: `2`
 
 - **formations**: Defines the number of suggested formations to copy.
   - Min: `1`
