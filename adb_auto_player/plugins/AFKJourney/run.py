@@ -311,12 +311,12 @@ class AFKJourney(Plugin):
                 return False
 
             template, x, y = self.wait_for_any_template(
-                ["first_clear.png", "retry.png"],
+                ["next.png", "first_clear.png", "retry.png"],
                 timeout=self.BATTLE_TIMEOUT,
             )
 
             match template:
-                case "first_clear.png":
+                case "next.png" | "first_clear.png":
                     return True
                 case "retry.png":
                     logging.info(f"Lost Battle #{count}")
@@ -464,17 +464,38 @@ class AFKJourney(Plugin):
         _, _, use_suggested_formations, _ = self.get_duras_trials_config()
         # y+100 clicks closer to center of the button instead of rate up text
         self.device.click(x, y + 100)
-        template, x, y = self.wait_for_any_template(["battle.png", "sweep.png"])
 
-        match template:
-            case "sweep.png":
-                logging.info("Dura Trial already finished returning")
-                return None
-            case "battle.png":
-                self.device.click(x, y)
-                self.handle_battle_screen(use_suggested_formations)
+        count: int = 0
+        while True:
+            self.wait_for_any_template(["records.png", "battle.png", "sweep.png"])
+            template, x, y = self.wait_for_any_template(
+                ["records.png", "battle.png", "sweep.png"]
+            )
+            match template:
+                case "sweep.png":
+                    logging.info("Dura's Trial already cleared")
+                    return None
+                case "battle.png":
+                    self.device.click(x, y)
+                case "records.png":
+                    pass
 
-        return None
+            result = self.handle_battle_screen(use_suggested_formations)
+
+            if result is True:
+                self.wait_for_template("first_clear.png")
+                next_button = self.find_first_template_center("next.png")
+                if next_button is not None:
+                    count += 1
+                    logging.info(f"Trials pushed: {count}")
+                    self.device.click(*next_button)
+                    sleep(3)
+                    continue
+                else:
+                    logging.info("Dura's Trial completed")
+                    return None
+            logging.info("Dura's Trial failed")
+            return None
 
 
 def execute(device: AdbDevice, config: dict[str, Any]) -> None | NoReturn:
