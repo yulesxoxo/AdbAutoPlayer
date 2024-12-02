@@ -17,6 +17,11 @@ from adb_auto_player.logging_setup import (
 )
 
 setup_logging()
+cmdline_args = [
+    "--disk-cache-dir=/dev/null" "--disable-extensions",
+    "-–incognito",
+    "--disable-application-cache",
+]
 
 
 def close(page: str, sockets: list[WebSocketT]) -> NoReturn:
@@ -40,6 +45,7 @@ def start() -> None:
             mode="chrome",
             size=(1280, 720),
             close_callback=close,
+            cmdline_args=cmdline_args,
         )
     else:
         eel.start(
@@ -49,6 +55,7 @@ def start() -> None:
             mode="chrome",
             size=(1280, 720),
             close_callback=close,
+            cmdline_args=cmdline_args,
         )
 
 
