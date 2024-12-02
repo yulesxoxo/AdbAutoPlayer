@@ -11,6 +11,8 @@ from adb_auto_player.plugin_loader import get_plugins_dir
 
 class AFKJourney(Plugin):
     BATTLE_TIMEOUT: int = 180
+    STORE_SEASON: str = "SEASON"
+    STORE_MAX_ATTEMPTS_REACHED: str = "MAX_ATTEMPTS_REACHED"
 
     def get_template_dir_path(self) -> str:
         return os.path.join(get_plugins_dir(), "AFKJourney", "templates")
@@ -110,6 +112,10 @@ class AFKJourney(Plugin):
 
             if not is_multi_stage and self.__handle_single_stage():
                 return True
+
+            if self.store.get(self.STORE_MAX_ATTEMPTS_REACHED, False):
+                self.store[self.STORE_MAX_ATTEMPTS_REACHED] = False
+                return False
 
         logging.info("Stopping Battle, tried all attempts for all Formations")
         return False
@@ -241,8 +247,9 @@ class AFKJourney(Plugin):
         self.wait_until_template_disappears("records.png")
         sleep(1)
 
-        if self.find_first_template_center("spend.png") and not spend_gold:
+        if self.find_any_template_center(["spend.png", "gold.png"]) and not spend_gold:
             logging.warning("Not spending gold returning.")
+            self.store[self.STORE_MAX_ATTEMPTS_REACHED] = True
             self.press_back_button()
             return False
 
@@ -298,11 +305,11 @@ class AFKJourney(Plugin):
         :param season: Push Season Stage if True otherwise push regular AFK Stages
         """
         _, _, push_both_modes = self.get_afk_stage_config()
-        self.store["season"] = season
+        self.store[self.STORE_SEASON] = season
 
         self.__start_afk_stage()
         if push_both_modes:
-            self.store["season"] = not season
+            self.store[self.STORE_SEASON] = not season
             self.__start_afk_stage()
 
         return None
@@ -320,7 +327,7 @@ class AFKJourney(Plugin):
         return None
 
     def __get_current_afk_stages_name(self) -> str:
-        season = self.store.get("season", False)
+        season = self.store.get(self.STORE_SEASON, False)
         if season:
             return "Season Talent Stages"
 
@@ -350,7 +357,7 @@ class AFKJourney(Plugin):
         self.wait_for_template("resonating_hall.png")
         self.device.click(550, 1080)  # click rewards popup
         sleep(1)
-        if self.store.get("season", False):
+        if self.store.get(self.STORE_SEASON, False):
             logging.debug("Clicking Talent Trials button")
             self.device.click(300, 1610)
         else:
