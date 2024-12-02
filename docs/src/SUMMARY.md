@@ -4,8 +4,8 @@
 - [Work in Progress](./wip.md)
 
 # User Guide
-- [Windows Setup](./windows-setup.md)
-- [macOS Setup](./macos-setup.md)
-
+- [Windows Setup Guide](user-guide/windows-setup.md)
+- [macOS Setup Guide](user-guide/macos-setup.md)
+- [Troubleshooting](user-guide/troubleshoot.md)
 # Games
 - [AFK Journey](games/afk-journey.md)
