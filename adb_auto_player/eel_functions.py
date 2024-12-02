@@ -175,16 +175,3 @@ def reload_config() -> None:
     global main_config, global_device
     main_config = plugin_loader.get_main_config()
     global_device = None
-
-
-@eel.expose
-def connect_to_first_device() -> None:
-    global main_config
-    device_infos = adb.get_devices(main_config)
-    if device_infos is None:
-        return None
-    device_info = device_infos[0] if device_infos else None
-
-    if device_info is None:
-        return None
-    main_config["device"]["id"] = device_info.serial

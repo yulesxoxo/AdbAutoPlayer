@@ -83,11 +83,6 @@
         event.preventDefault()
         window.eel?.reload_config()
     }
-
-    function connectToFirstDevice(event: Event) {
-        event.preventDefault()
-        window.eel?.connect_to_first_device()
-    }
 </script>
 
 <main class="container">
@@ -110,9 +105,6 @@
         {:else}
             <button on:click={(event) => reloadConfig(event)}>
                 Reload main_config.toml
-            </button>
-            <button on:click={(event) => connectToFirstDevice(event)}>
-                Connect to first device
             </button>
         {/if}
     </CommandPanel>
