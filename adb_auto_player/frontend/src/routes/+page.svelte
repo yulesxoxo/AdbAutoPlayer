@@ -128,9 +128,10 @@
         overflow-y: auto;
         background-color: #0f0f0f98;
         padding: 10px;
+        resize: vertical;
         white-space: pre-wrap;
         text-align: left;
-        font-family: Consolas,monospace;
+        font-family: Consolas, monospace;
     }
 
     button {
