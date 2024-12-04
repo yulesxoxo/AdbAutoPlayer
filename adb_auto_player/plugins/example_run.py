@@ -1,4 +1,5 @@
 import os
+from time import sleep
 from typing import Any, NoReturn
 
 from adbutils._device import AdbDevice
@@ -26,5 +27,13 @@ class Example(Plugin):
         return None
 
 
-def execute(device: AdbDevice, config: dict[str, Any]) -> NoReturn:
-    logging.critical_and_exit("WIP")
+def execute(device: AdbDevice, config: dict[str, Any]) -> None | NoReturn:
+    game = Example(device, config)
+
+    game.check_requirements()
+
+    sleep(1)
+
+    game.run_cli_menu()
+
+    return None
