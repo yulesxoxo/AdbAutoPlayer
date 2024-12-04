@@ -19,13 +19,12 @@ def get_device(main_config: dict[str, Any]) -> AdbDevice | NoReturn:
     try:
         devices = client.list()
         if len(devices) == 0:
-            raise RuntimeError("No devices found")
-
-        devices_str = "Devices:"
-        for device_info in devices:
-            devices_str += f"\n{device_info.serial}"
-
-        logging.info(devices_str)
+            logging.warning("No devices found")
+        else:
+            devices_str = "Devices:"
+            for device_info in devices:
+                devices_str += f"\n{device_info.serial}"
+            logging.info(devices_str)
 
         device = client.device(f"{device_id}")
 

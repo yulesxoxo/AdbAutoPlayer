@@ -60,7 +60,7 @@ def get_plugin() -> dict[str, Any] | None:
             plugins,
             app,
         )
-
+        logging.info(f"Currently running app: {app}")
     return global_plugin
 
 
@@ -71,13 +71,12 @@ def get_game_object() -> Plugin | None:
     plugin = get_plugin()
     if plugin is None:
         return None
-
     module = plugin_loader.load_plugin_module(str(plugin.get("dir")))
     classes = [cls for name, cls in inspect.getmembers(module, inspect.isclass)]
-    class_name = classes[0]
-    game = class_name(get_device(), main_config)
-    if isinstance(game, Plugin):
-        return game
+    for cls in classes:
+        if issubclass(cls, Plugin) and cls is not Plugin:
+            return cls(device, main_config)
+
     return None
 
 
@@ -115,7 +114,6 @@ def execute(i: int) -> None:
     kwargs = option.get("kwargs")
 
     if callable(action) and isinstance(kwargs, dict):
-
         action_process = Process(
             target=run_action_in_process,
             args=(
