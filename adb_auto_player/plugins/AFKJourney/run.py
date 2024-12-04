@@ -50,6 +50,11 @@ class AFKJourney(Plugin):
                 "action": self.handle_battle_screen,
                 "kwargs": {"use_suggested_formations": False},
             },
+            {
+                "label": "Assist in Synergy and CC",
+                "action": self.assist_synergy_corrupt_creature,
+                "kwargs": {},
+            },
             # I already finished this, so I can't test to implement it.
             # {
             #    "label": "Season Legend Trial",
@@ -58,11 +63,13 @@ class AFKJourney(Plugin):
             # },
         ]
 
-    def get_general_config(self) -> list[str]:
-        excluded_heroes: list[str] = self.config.get("general", {}).get(
-            "excluded_heroes", []
-        )
-        return excluded_heroes
+    def get_general_config(self) -> tuple[list[str], int]:
+        config = self.config.get(self.CONFIG_GENERAL, {})
+        excluded_heroes: list[str] = config.get("excluded_heroes", [])
+        assist_limit = int(config.get("attempts", 20))
+        assist_limit = min(assist_limit, 20)
+        assist_limit = max(assist_limit, 1)
+        return excluded_heroes, assist_limit
 
     def get_afk_stage_config(self) -> tuple[int, int, bool, bool]:
         config = self.config.get(self.CONFIG_AFK_STAGES, {})
@@ -175,7 +182,7 @@ class AFKJourney(Plugin):
         return True
 
     def __formation_contains_excluded_hero(self) -> str | None:
-        excluded_heroes = self.get_general_config()
+        excluded_heroes, _ = self.get_general_config()
         excluded_heroes_dict = {
             f"heroes/{name.lower().replace(" ", "")}.png": name
             for name in excluded_heroes
@@ -496,6 +503,81 @@ class AFKJourney(Plugin):
                     return None
             logging.info("Dura's Trial failed")
             return None
+
+    def assist_synergy_corrupt_creature(self) -> None:
+        _, assist_limit = self.get_general_config()
+        logging.info("Assisting Synergy and Corrupt Creature in world chat")
+        count: int = 0
+        while count < assist_limit:
+            if self.__find_synergy_or_corrupt_creature():
+                count += 1
+
+        logging.info("Done assisting")
+        return None
+
+    def __close_profile(self) -> None:
+        while self.find_first_template_center("my_formation.png"):
+            self.press_back_button()
+            sleep(1)
+        return None
+
+    def __find_synergy_or_corrupt_creature(self) -> bool:
+        world_chat = self.find_first_template_center("world_chat.png")
+        if world_chat is None:
+            if self.find_first_template_center("my_formation.png"):
+                self.__close_profile()
+                return False
+            if self.find_any_template_center(["tap_to_enter.png", "team-up_chat.png"]):
+                logging.info("Switching to world chat")
+                self.device.click(110, 350)
+                return False
+            logging.info("Opening chat")
+            self.__navigate_to_default_state()
+            self.device.click(1010, 1080)
+            return False
+        self.device.click(260, 1400)
+        sleep(1)
+        # TODO add synergy here
+        result = self.find_any_template_center(["join_now.png"])
+        if result is None:
+            if self.find_first_template_center("world_chat.png") is None:
+                if self.find_first_template_center("my_formation.png"):
+                    self.__close_profile()
+                else:
+                    self.press_back_button()
+                    sleep(1)
+            return False
+        template, x, y = result
+        self.device.click(x, y)
+        match template:
+            case "join_now.png":
+                logging.info("Battling Corrupt Creature")
+                self.__handle_corrupt_creature()
+                return True
+        return False
+
+    def __handle_corrupt_creature(self) -> None:
+        ready = self.wait_for_template("ready.png")
+        self.device.click(*ready)
+        # Sometimes people wait forever for a third to join...
+        while self.find_first_template_center("assist_rewards_heart.png"):
+            sleep(1)
+        self.wait_for_template("bell.png")
+        # click first 5 heroes in row 1 and 2
+        for x in [110, 290, 470, 630, 800]:
+            self.device.click(x, 1300)
+            sleep(1)
+        while True:
+            cc_ready = self.find_first_template_center("cc_ready.png")
+            if cc_ready:
+                self.device.click(*cc_ready)
+                sleep(1)
+            else:
+                break
+        self.wait_for_template("assist_reward.png")
+        logging.info("Corrupt Creature done")
+        self.press_back_button()
+        return None
 
 
 def execute(device: AdbDevice, config: dict[str, Any]) -> None | NoReturn:

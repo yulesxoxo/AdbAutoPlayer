@@ -20,6 +20,7 @@ excluded_heroes = [
     #"Valen",
     #"Walker",
 ]
+assist_limit = 20
 
 [afk_stages]
 attempts = 5
