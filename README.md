@@ -1,6 +1,6 @@
 # AdbAutoPlayer
 
-[Click Here to Access the Full Documentation and Usage Details](https://yulesxoxo.github.io/AdbAutoPlayer/)
+## [Click Here to Access the Full Documentation and Usage Details](https://yulesxoxo.github.io/AdbAutoPlayer/)
 ![gui.png](docs/src/images/app/app.png)
 
 ## Windows Native Setup
