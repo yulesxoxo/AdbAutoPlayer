@@ -32,8 +32,8 @@ def get_main_config() -> dict[str, Any]:
 def scan_plugins() -> list[dict[str, Any]]:
     plugins = []
 
-    for plugin_dir in os.listdir(get_plugins_dir()):
-        config = load_config(plugin_dir)
+    for plugin_dir_name in os.listdir(get_plugins_dir()):
+        config = load_config(plugin_dir_name)
 
         if config:
             plugin_config = config.get("plugin", {})
@@ -42,7 +42,7 @@ def scan_plugins() -> list[dict[str, Any]]:
             plugin = {
                 "package": package,
                 "name": name,
-                "dir": plugin_dir,
+                "dir": plugin_dir_name,
             }
             plugins.append(plugin)
 
@@ -86,8 +86,11 @@ def create_plugin_list_file(plugins: list[dict[str, Any]]) -> None:
         json.dump(plugin_data, f, indent=4)
 
 
-def load_config(plugin_name: str) -> dict[str, Any]:
+def load_config(plugin_name: str) -> dict[str, Any] | None:
     config_file = os.path.join(get_plugins_dir(), plugin_name, PLUGIN_CONFIG_FILE)
+    # macOS likes to create .DS_Store files
+    if not os.path.exists(config_file):
+        return None
     with open(config_file, "rb") as f:
         return tomllib.load(f)
 
