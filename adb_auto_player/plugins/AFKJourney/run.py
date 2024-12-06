@@ -324,7 +324,6 @@ class AFKJourney(Plugin):
 
             match template:
                 case "next.png" | "first_clear.png":
-                    self.press_back_button()
                     return True
                 case "retry.png":
                     logging.info(f"Lost Battle #{count}")
@@ -496,6 +495,7 @@ class AFKJourney(Plugin):
                 if next_button is not None:
                     count += 1
                     logging.info(f"Trials pushed: {count}")
+                    self.device.click(*next_button)
                     self.device.click(*next_button)
                     sleep(3)
                     continue
