@@ -324,6 +324,7 @@ class AFKJourney(Plugin):
 
             match template:
                 case "next.png" | "first_clear.png":
+                    self.press_back_button()
                     return True
                 case "retry.png":
                     logging.info(f"Lost Battle #{count}")
