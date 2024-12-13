@@ -538,8 +538,7 @@ class AFKJourney(Plugin):
             return False
         self.device.click(260, 1400)
         sleep(1)
-        # TODO add synergy here
-        result = self.find_any_template_center(["join_now.png"])
+        result = self.find_any_template_center(["join_now.png", "synergy.png"])
         if result is None:
             if self.find_first_template_center("world_chat.png") is None:
                 if self.find_first_template_center("my_formation.png"):
@@ -555,6 +554,9 @@ class AFKJourney(Plugin):
                 logging.info("Battling Corrupt Creature")
                 self.__handle_corrupt_creature()
                 return True
+            case "synergy.png":
+                logging.info("Synergy")
+                return self.__handle_synergy()
         return False
 
     def __handle_corrupt_creature(self) -> None:
@@ -579,6 +581,18 @@ class AFKJourney(Plugin):
         logging.info("Corrupt Creature done")
         self.press_back_button()
         return None
+
+    def __handle_synergy(self) -> bool:
+        go = self.find_first_template_center("go.png")
+        if go is None:
+            return False
+        self.device.click(*go)
+        sleep(3)
+        self.device.click(130, 900)
+        sleep(1)
+        self.device.click(630, 1800)
+
+        return True
 
 
 def execute(device: AdbDevice, config: dict[str, Any]) -> None | NoReturn:
