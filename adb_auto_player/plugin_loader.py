@@ -17,7 +17,13 @@ MAIN_CONFIG_FILE = "main_config.toml"
 def get_plugins_dir() -> str:
     if getattr(sys, "frozen", False):
         return os.path.join(os.path.dirname(sys.executable), "plugins")
-    return os.path.join("plugins")
+    return "plugins"
+
+
+def get_plugin_list_file_location() -> str:
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return ""
 
 
 def get_main_config() -> dict[str, Any]:
@@ -82,7 +88,7 @@ def load_plugin_configs() -> list[dict[str, Any]]:
 def create_plugin_list_file(plugins: list[dict[str, Any]]) -> None:
     plugin_data = {"hash": generate_plugin_list_hash(), "plugins": plugins}
 
-    with open(PLUGIN_LIST_FILE, "w") as f:
+    with open(get_plugin_list_file_location() + "/" + PLUGIN_LIST_FILE, "w") as f:
         json.dump(plugin_data, f, indent=4)
 
 
