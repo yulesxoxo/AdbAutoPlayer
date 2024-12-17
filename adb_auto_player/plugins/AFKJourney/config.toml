@@ -1,5 +1,5 @@
 [general]
-excluded_heroes = [ "Alsa", "Antandra", "Arden", "Atalanta", "Carolina", "Cassadee", "Cecia", "Damian", "Dionel", "Dunlingr", "Fae", "Florabelle", "Smokey",]
+excluded_heroes = []
 assist_limit = 20
 
 [afk_stages]
