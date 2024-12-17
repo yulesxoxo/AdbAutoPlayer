@@ -167,6 +167,13 @@
         justify-content: space-between;
     }
 
+    /* Specifically target labels for non-multicheckbox inputs */
+    .form-group:not(:has(.multicheckbox-grouped)) .form-group-inner label {
+        flex: 0 0 200px; /* Fixed width for labels */
+        margin-right: 10px;
+        text-align: right;
+    }
+
     .input-container {
         flex: 1;
         display: flex;
@@ -178,7 +185,7 @@
     }
 
     .input-container input[type="checkbox"] {
-        margin: 0;
+        margin: 2px;
     }
 
     .multicheckbox-grouped {
