@@ -33,9 +33,12 @@ def find_center(
     template_image_path: str,
     threshold: float = 0.9,
     grayscale: bool = False,
+    base_image: Image.Image | None = None,
 ) -> Tuple[int, int] | None:
+    if base_image is None:
+        base_image = get_screenshot(device)
     return __find_template_center(
-        base_image=get_screenshot(device),
+        base_image=base_image,
         template_image=__load_image(image_path=template_image_path),
         threshold=threshold,
         grayscale=grayscale,

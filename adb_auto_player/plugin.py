@@ -3,6 +3,7 @@ from abc import abstractmethod
 from time import sleep
 from typing import Any
 
+from PIL import Image
 from adbutils._device import AdbDevice
 
 import adb_auto_player.adb as adb
@@ -44,7 +45,10 @@ class Plugin:
         return None
 
     def find_first_template_center(
-        self, template: str, grayscale: bool = False
+        self,
+        template: str,
+        grayscale: bool = False,
+        base_image: Image.Image | None = None,
     ) -> tuple[int, int] | None:
         template_path = os.path.join(
             self.get_template_dir_path(),
@@ -52,9 +56,7 @@ class Plugin:
         )
 
         return screen_utils.find_center(
-            self.device,
-            template_path,
-            grayscale=grayscale,
+            self.device, template_path, grayscale=grayscale, base_image=base_image
         )
 
     def find_all_template_centers(
@@ -147,10 +149,12 @@ class Plugin:
         templates: list[str],
         grayscale: bool = False,
     ) -> tuple[str, int, int] | None:
+        base_image = screen_utils.get_screenshot(self.device)
         for template in templates:
             result = self.find_first_template_center(
                 template,
                 grayscale=grayscale,
+                base_image=base_image,
             )
             if result is not None:
                 x, y = result
