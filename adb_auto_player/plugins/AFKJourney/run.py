@@ -105,17 +105,17 @@ class AFKJourney(Plugin):
                 "kwargs": {},
             },
             {
-                "label": "Fight Battle using suggested Formations",
+                "label": "Battle (suggested Formations)",
                 "action": self.handle_battle_screen,
                 "kwargs": {"use_suggested_formations": True},
             },
             {
-                "label": "Fight Battle using your own Formation",
+                "label": "Battle (current Formation)",
                 "action": self.handle_battle_screen,
                 "kwargs": {"use_suggested_formations": False},
             },
             {
-                "label": "Assist in Synergy and CC",
+                "label": "Assist Synergy & CC",
                 "action": self.assist_synergy_corrupt_creature,
                 "kwargs": {},
             },
