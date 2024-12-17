@@ -12,6 +12,7 @@ from adbutils._device import AdbDevice
 import adb_auto_player.adb as adb
 import adb_auto_player.plugin_loader as plugin_loader
 from adb_auto_player import logging_setup
+from adb_auto_player.exceptions import AdbException
 from adb_auto_player.plugin import Plugin
 
 main_config = plugin_loader.get_main_config()
@@ -32,7 +33,7 @@ def get_device() -> AdbDevice | None:
     if global_device is None:
         try:
             global_device = adb.get_device(main_config)
-        except SystemExit:
+        except AdbException:
             return None
     return global_device
 
@@ -46,7 +47,7 @@ def get_plugin() -> dict[str, Any] | None:
 
     try:
         app = adb.get_currently_running_app(device)
-    except SystemExit:
+    except AdbException:
         return None
     if global_plugin is not None:
         if app != global_plugin.get("package"):
@@ -60,7 +61,6 @@ def get_plugin() -> dict[str, Any] | None:
             plugins,
             app,
         )
-        logging.info(f"Currently running app: {app}")
     return global_plugin
 
 
@@ -71,7 +71,10 @@ def get_game_object() -> Plugin | None:
     plugin = get_plugin()
     if plugin is None:
         return None
-    module = plugin_loader.load_plugin_module(str(plugin.get("dir")))
+    try:
+        module = plugin_loader.load_plugin_module(str(plugin.get("dir")))
+    except Exception as e:
+        logging.error(f"{e}")
     classes = [cls for name, cls in inspect.getmembers(module, inspect.isclass)]
     for cls in classes:
         if issubclass(cls, Plugin) and cls is not Plugin:
@@ -136,14 +139,17 @@ def run_action_in_process(
     log_queue: multiprocessing.Queue,  # type: ignore
     log_level: int,
 ) -> None:
-    child_logger = logging.getLogger()
-    child_logger.addHandler(QueueHandler(log_queue))
-    child_logger.setLevel(log_level)
-    game = get_game_object()
-    if hasattr(game, action):
-        action_func = getattr(game, action)
-        if callable(action_func):
-            action_func(**kwargs)
+    try:
+        child_logger = logging.getLogger()
+        child_logger.addHandler(QueueHandler(log_queue))
+        child_logger.setLevel(log_level)
+        game = get_game_object()
+        if hasattr(game, action):
+            action_func = getattr(game, action)
+            if callable(action_func):
+                action_func(**kwargs)
+    except Exception as e:
+        logging.error(f"{e}")
 
 
 @eel.expose

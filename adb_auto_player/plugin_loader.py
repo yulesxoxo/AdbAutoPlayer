@@ -5,9 +5,9 @@ import os
 import sys
 import tomllib
 import types
-from typing import Any, cast, NoReturn
+from typing import Any, cast
 
-import adb_auto_player.logger as logging
+import logging
 
 PLUGIN_LIST_FILE = "plugin_list.json"
 PLUGIN_CONFIG_FILE = "config.toml"
@@ -17,13 +17,13 @@ MAIN_CONFIG_FILE = "main_config.toml"
 def get_plugins_dir() -> str:
     if getattr(sys, "frozen", False):
         return os.path.join(os.path.dirname(sys.executable), "plugins")
-    return "plugins"
+    return "./plugins"
 
 
 def get_plugin_list_file_location() -> str:
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
-    return ""
+    return "."
 
 
 def get_main_config() -> dict[str, Any]:
@@ -101,28 +101,28 @@ def load_config(plugin_name: str) -> dict[str, Any] | None:
         return tomllib.load(f)
 
 
-def load_plugin_module(plugin_name: str) -> types.ModuleType | NoReturn:
+def load_plugin_module(plugin_name: str) -> types.ModuleType:
+    """
+    :raises ValueError: When module spec could not be loaded
+    """
     plugin_main_path = os.path.join(get_plugins_dir(), plugin_name, "run.py")
     logging.debug(f"Loading plugin module: {plugin_main_path}")
 
-    try:
-        spec = importlib.util.spec_from_file_location(plugin_name, plugin_main_path)
-        if spec is None:
-            raise ValueError("Failed to load module spec")
+    spec = importlib.util.spec_from_file_location(plugin_name, plugin_main_path)
+    if spec is None:
+        raise ValueError("Failed to load module spec")
 
-        module = importlib.util.module_from_spec(spec)
+    module = importlib.util.module_from_spec(spec)
 
-        sys.modules[plugin_name] = module
+    sys.modules[plugin_name] = module
 
-        loader = spec.loader
-        if loader is None:
-            raise ValueError("Failed to load spec loader")
+    loader = spec.loader
+    if loader is None:
+        raise ValueError("Failed to load spec loader")
 
-        loader.exec_module(module)
+    loader.exec_module(module)
 
-        return module
-    except Exception as e:
-        logging.critical_and_exit(f"Error loading plugin {plugin_name}: {e}")
+    return module
 
 
 def get_plugin_for_app(

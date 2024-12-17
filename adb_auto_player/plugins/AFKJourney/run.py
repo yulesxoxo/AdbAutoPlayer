@@ -1,10 +1,10 @@
 import os.path
 from time import sleep
-from typing import Any, NoReturn
+from typing import Any
 
-from adbutils._device import AdbDevice
+import logging
 
-import adb_auto_player.logger as logging
+from adb_auto_player.exceptions import TimeoutException
 from adb_auto_player.plugin import Plugin
 from adb_auto_player.plugin_loader import get_plugins_dir
 
@@ -103,13 +103,11 @@ class AFKJourney(Plugin):
 
         return attempts, formations, use_suggested_formations, spend_gold
 
-    def handle_battle_screen(
-        self, use_suggested_formations: bool = True
-    ) -> bool | NoReturn:
+    def handle_battle_screen(self, use_suggested_formations: bool = True) -> bool:
         """
         Handles logic for battle screen
         :param use_suggested_formations: if False use suggested formations from records
-        :return:
+        :return: bool
         """
         if self.store.get(self.STORE_MODE, None) == self.MODE_DURAS_TRIALS:
             _, formations, _, _ = self.get_duras_trials_config()
@@ -146,7 +144,7 @@ class AFKJourney(Plugin):
         logging.info("Stopping Battle, tried all attempts for all Formations")
         return False
 
-    def __copy_suggested_formation(self, formation_num: int = 1) -> int | NoReturn:
+    def __copy_suggested_formation(self, formation_num: int = 1) -> int:
         logging.info(f"Copying Formation #{formation_num}")
         records = self.wait_for_template("records.png")
         self.device.click(*records)
@@ -155,7 +153,7 @@ class AFKJourney(Plugin):
             formation_next = self.wait_for_template(
                 "formation_next.png",
                 timeout=5,
-                exit_message=f"Formation #{formation_num} not found",
+                timeout_message=f"Formation #{formation_num} not found",
             )
             self.device.click(*formation_next)
             sleep(1)
@@ -208,7 +206,7 @@ class AFKJourney(Plugin):
         template, _, _ = result
         return excluded_heroes.get(template)
 
-    def __handle_multi_stage(self) -> bool | NoReturn:
+    def __handle_multi_stage(self) -> bool:
         if self.store.get(self.STORE_MODE, None) == self.MODE_DURAS_TRIALS:
             attempts, _, _, _ = self.get_duras_trials_config()
         else:
@@ -268,7 +266,7 @@ class AFKJourney(Plugin):
                         self.__select_afk_stage()
                         return False
 
-    def start_battle(self) -> bool | NoReturn:
+    def start_battle(self) -> bool:
         _, _, _, spend_gold = self.get_duras_trials_config()
 
         self.wait_for_template("records.png")
@@ -304,7 +302,7 @@ class AFKJourney(Plugin):
         confirm = self.wait_for_template("confirm.png")
         self.device.click(*confirm)
 
-    def __handle_single_stage(self) -> bool | NoReturn:
+    def __handle_single_stage(self) -> bool:
         if self.store.get(self.STORE_MODE, None) == self.MODE_DURAS_TRIALS:
             attempts, _, _, _ = self.get_duras_trials_config()
         else:
@@ -330,7 +328,7 @@ class AFKJourney(Plugin):
                     self.device.click(x, y)
         return False
 
-    def push_afk_stages(self, season: bool) -> None | NoReturn:
+    def push_afk_stages(self, season: bool) -> None:
         """
         Entry for pushing AFK Stages
         :param season: Push Season Stage if True otherwise push regular AFK Stages
@@ -346,7 +344,7 @@ class AFKJourney(Plugin):
 
         return None
 
-    def __start_afk_stage(self) -> None | NoReturn:
+    def __start_afk_stage(self) -> None:
         stages_pushed: int = 0
         stages_name = self.__get_current_afk_stages_name()
 
@@ -398,7 +396,7 @@ class AFKJourney(Plugin):
 
         return None
 
-    def push_duras_trials(self) -> None | NoReturn:
+    def push_duras_trials(self) -> None:
         """
         Entry for pushing Dura's Trials
         :return:
@@ -438,7 +436,7 @@ class AFKJourney(Plugin):
 
         return None
 
-    def __navigate_to_duras_trials_screen(self) -> None | NoReturn:
+    def __navigate_to_duras_trials_screen(self) -> None:
         logging.info("Navigating to Dura's Trial select")
         notice = self.find_first_template_center("notice.png")
         if notice is not None:
@@ -460,14 +458,14 @@ class AFKJourney(Plugin):
                 logging.info("Clicking Battle Modes button")
                 self.device.click(460, 1830)
                 duras_trials_label = self.wait_for_template(
-                    "duras_trials.png", exit_message="Could not find Dura's Trials"
+                    "duras_trials.png", timeout_message="Could not find Dura's Trials"
                 )
                 self.device.click(*duras_trials_label)
             case "rate_up.png":
                 pass
         return None
 
-    def __handle_dura_screen(self, x: int, y: int) -> None | NoReturn:
+    def __handle_dura_screen(self, x: int, y: int) -> None:
         _, _, use_suggested_formations, _ = self.get_duras_trials_config()
         # y+100 clicks closer to center of the button instead of rate up text
         self.device.click(x, y + 100)
@@ -559,15 +557,10 @@ class AFKJourney(Plugin):
         return False
 
     def __handle_corrupt_creature(self) -> bool:
-        count = 0
-        while True:
+        try:
             ready = self.wait_for_template("ready.png")
-            if ready is not None:
-                break
-            if count >= 3:
-                return False
-            sleep(1)
-            count += 1
+        except TimeoutException:
+            return False
 
         self.device.click(*ready)
         # Sometimes people wait forever for a third to join...
@@ -601,15 +594,3 @@ class AFKJourney(Plugin):
         self.device.click(630, 1800)
 
         return True
-
-
-def execute(device: AdbDevice, config: dict[str, Any]) -> None | NoReturn:
-    game = AFKJourney(device, config)
-
-    game.check_requirements()
-
-    sleep(1)
-
-    game.run_cli_menu()
-
-    return None

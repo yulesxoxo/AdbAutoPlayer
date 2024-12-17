@@ -1,14 +1,14 @@
 import os.path
-import sys
 from abc import abstractmethod
 from time import sleep
-from typing import Any, NoReturn
+from typing import Any
 
 from adbutils._device import AdbDevice
 
 import adb_auto_player.adb as adb
-import adb_auto_player.logger as logging
+import logging
 import adb_auto_player.screen_utils as screen_utils
+from adb_auto_player.exceptions import UnsupportedResolutionException, TimeoutException
 
 
 class Plugin:
@@ -25,39 +25,16 @@ class Plugin:
     def get_menu_options(self) -> list[dict[str, Any]]:
         return []
 
-    def run_cli_menu(self) -> None:
-        menu_options = self.get_menu_options()
-
-        while True:
-            print("Select an option:")
-            for index, option in enumerate(menu_options, 1):
-                print(f"[{index}] {option['label']}")
-            print("[0] Exit")
-            choice_input: str = input(">> ")
-
-            print(choice_input)
-            if not choice_input.isdigit():
-                print("Invalid input, please try again.")
-                continue
-            if choice_input == "0":
-                print("Exiting...")
-                sys.exit(0)
-
-            choice: int = int(choice_input) - 1
-            if len(menu_options) <= choice:
-                print("Invalid input, please try again.")
-                continue
-
-            option = menu_options[choice]
-            option["action"](**option["kwargs"])
-
-    def check_requirements(self) -> None | NoReturn:
+    def check_requirements(self) -> None:
+        """
+        :raises UnsupportedResolutionException:
+        """
         resolution = adb.get_screen_resolution(self.device)
         supported_resolution = self.config.get("plugin", {}).get(
             "supported_resolution", "1080x1920"
         )
         if resolution != supported_resolution:
-            logging.critical_and_exit(
+            raise UnsupportedResolutionException(
                 f"This plugin only supports {supported_resolution}"
             )
         return None
@@ -96,8 +73,11 @@ class Plugin:
         grayscale: bool = False,
         delay: int = 1,
         timeout: int = 30,
-        exit_message: str | None = None,
-    ) -> tuple[int, int] | NoReturn:
+        timeout_message: str | None = None,
+    ) -> tuple[int, int]:
+        """
+        :raises TimeoutException:
+        """
         elapsed_time = 0
         while True:
             result = self.find_first_template_center(
@@ -111,16 +91,19 @@ class Plugin:
             sleep(delay)
             elapsed_time += delay
             if elapsed_time >= timeout:
-                if exit_message:
-                    logging.critical_and_exit(f"{exit_message}")
+                if timeout_message:
+                    raise TimeoutException(f"{timeout_message}")
                 else:
-                    logging.critical_and_exit(
+                    raise TimeoutException(
                         f"Could not find Template: '{template}' after {timeout} seconds"
                     )
 
     def wait_until_template_disappears(
         self, template: str, delay: int = 1, timeout: int = 30
-    ) -> None | NoReturn:
+    ) -> None:
+        """
+        :raises TimeoutException:
+        """
         elapsed_time = 0
         while True:
             if self.find_first_template_center(template) is None:
@@ -130,13 +113,16 @@ class Plugin:
             sleep(delay)
             elapsed_time += delay
             if elapsed_time >= timeout:
-                logging.critical_and_exit(
+                raise TimeoutException(
                     f"Template: {template} is still visible after {timeout} seconds"
                 )
 
     def wait_for_any_template(
         self, templates: list[str], delay: int = 3, timeout: int = 30
-    ) -> tuple[str, int, int] | NoReturn:
+    ) -> tuple[str, int, int]:
+        """
+        :raises TimeoutException:
+        """
         elapsed_time = 0
         while True:
             result = self.find_any_template_center(templates)
@@ -147,7 +133,7 @@ class Plugin:
             sleep(delay)
             elapsed_time += delay
             if elapsed_time >= timeout:
-                logging.critical_and_exit(
+                raise TimeoutException(
                     f"None of the templates {templates}"
                     f" were found after {timeout} seconds"
                 )

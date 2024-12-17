@@ -10,7 +10,7 @@ from typing import Any
 import requests
 from packaging.version import Version
 
-import adb_auto_player.logger as logging
+import logging
 
 GITHUB_REPO: str = "yulesxoxo/AdbAutoPlayer"
 RELEASE_API_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"

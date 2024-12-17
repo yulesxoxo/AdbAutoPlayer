@@ -9,8 +9,6 @@ This guide walks you through setting up **AdbAutoPlayer** on macOS (Apple Silico
 ### 1. **Download the Tool**
 - Get the latest release of **AdbAutoPlayer**:  
   [AdbAutoPlayer_MacOS.zip](https://github.com/yulesxoxo/AdbAutoPlayer/releases/latest).
-- Alternatively, download the CLI version:  
-  [AdbAutoPlayer_CLI_MacOS.zip](https://github.com/yulesxoxo/AdbAutoPlayer/releases/latest).
 - Extract the `.zip` file to a folder on your computer.
 
 ### 2. **Install MuMuPlayer Pro**

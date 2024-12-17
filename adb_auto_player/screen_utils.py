@@ -1,33 +1,31 @@
 import io
-from typing import Tuple, NoReturn
+from typing import Tuple
 
 import cv2
 import numpy as np
 from PIL import Image
 from adbutils._device import AdbDevice
+from adb_auto_player.exceptions import AdbException
 
-import adb_auto_player.logger as logging
 
-
-def get_screenshot(device: AdbDevice) -> Image.Image | NoReturn:
+def get_screenshot(device: AdbDevice) -> Image.Image:
+    """
+    :raises AdbException: Screenshot cannot be recorded
+    """
     screenshot_data = device.shell("screencap -p", encoding=None)
     if isinstance(screenshot_data, bytes):
         return Image.open(io.BytesIO(screenshot_data))
-
-    logging.critical_and_exit(
-        f"Screenshots cannot be recorded from device: {device.serial}"
-    )
+    raise AdbException(f"Screenshots cannot be recorded from device: {device.serial}")
 
 
-def __load_image(image_path: str) -> Image.Image | NoReturn:
-    try:
-        image = Image.open(image_path)
-        image.load()
-        return image
-    except FileNotFoundError:
-        logging.critical_and_exit(f"The file '{image_path}' does not exist")
-    except IOError:
-        logging.critical_and_exit(f"The file '{image_path}' is not a valid image")
+def __load_image(image_path: str) -> Image.Image:
+    """
+    :raises FileNotFoundError:
+    :raises IOError:
+    """
+    image = Image.open(image_path)
+    image.load()
+    return image
 
 
 def find_center(
