@@ -218,7 +218,8 @@ class AFKJourney(Plugin):
         records = self.wait_for_template("records.png")
         self.device.click(*records)
 
-        while formation_num > 1:
+        counter = formation_num
+        while counter > 1:
             formation_next = self.wait_for_template(
                 "formation_next.png",
                 timeout=5,
@@ -226,7 +227,7 @@ class AFKJourney(Plugin):
             )
             self.device.click(*formation_next)
             sleep(1)
-            formation_num -= 1
+            counter -= 1
 
         copy = self.wait_for_template("copy.png", timeout=5)
 
