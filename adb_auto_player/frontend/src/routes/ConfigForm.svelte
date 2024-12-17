@@ -5,7 +5,7 @@
         onConfigSave
     } = $props();
 
-    // Exclude the plugin section
+    // Previous script remains unchanged
     const configSections = Object.entries(config)
         .filter(([key]) => key !== 'plugin')
         .map(([sectionKey, sectionConfig]) => ({
@@ -32,6 +32,7 @@
     }
 
     function handleSave() {
+        // Previous handleSave method remains unchanged
         const formElement = document.querySelector('form.config-form') as HTMLFormElement;
         const formData = new FormData(formElement);
 
@@ -81,55 +82,59 @@
 
             {#each Object.entries(sectionConfig) as [key, value]}
                 <div class="form-group">
-                    <label for="{sectionKey}-{key}">
-                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </label>
+                    <div class="form-group-inner">
+                        <label for="{sectionKey}-{key}">
+                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </label>
 
-                    {#if getInputType(key, value) === 'checkbox'}
-                        <input
-                                type="checkbox"
-                                id="{sectionKey}-{key}"
-                                name="{sectionKey}-{key}"
-                                checked={value}
-                        />
-                    {:else if getInputType(key, value) === 'number'}
-                        <input
-                                type="number"
-                                id="{sectionKey}-{key}"
-                                name="{sectionKey}-{key}"
-                                value={value}
-                                min="1"
-                        />
-                    {:else if getInputType(key, value) === 'multicheckbox'}
-                        {@const groupedOptions = groupOptionsByFirstLetter(choices[sectionKey]?.[key] || [])}
-                        <div class="multicheckbox-grouped">
-                            {#each Object.entries(groupedOptions) as [letter, options]}
-                                <div class="letter-group">
-                                    <div class="letter-header">{letter}</div>
-                                    <div class="letter-options">
-                                        {#each options as option}
-                                            <label class="checkbox-container">
-                                                <input
-                                                        type="checkbox"
-                                                        name="{sectionKey}-{key}"
-                                                        value={option}
-                                                        checked={value.includes(option)}
-                                                />
-                                                {option}
-                                            </label>
-                                        {/each}
-                                    </div>
+                        <div class="input-container">
+                            {#if getInputType(key, value) === 'checkbox'}
+                                <input
+                                        type="checkbox"
+                                        id="{sectionKey}-{key}"
+                                        name="{sectionKey}-{key}"
+                                        checked={value}
+                                />
+                            {:else if getInputType(key, value) === 'number'}
+                                <input
+                                        type="number"
+                                        id="{sectionKey}-{key}"
+                                        name="{sectionKey}-{key}"
+                                        value={value}
+                                        min="1"
+                                />
+                            {:else if getInputType(key, value) === 'multicheckbox'}
+                                {@const groupedOptions = groupOptionsByFirstLetter(choices[sectionKey]?.[key] || [])}
+                                <div class="multicheckbox-grouped">
+                                    {#each Object.entries(groupedOptions) as [letter, options]}
+                                        <div class="letter-group">
+                                            <div class="letter-header">{letter}</div>
+                                            <div class="letter-options">
+                                                {#each options as option}
+                                                    <label class="checkbox-container">
+                                                        <input
+                                                                type="checkbox"
+                                                                name="{sectionKey}-{key}"
+                                                                value={option}
+                                                                checked={value.includes(option)}
+                                                        />
+                                                        {option}
+                                                    </label>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                    {/each}
                                 </div>
-                            {/each}
+                            {:else}
+                                <input
+                                        type="text"
+                                        id="{sectionKey}-{key}"
+                                        name="{sectionKey}-{key}"
+                                        value={value}
+                                />
+                            {/if}
                         </div>
-                    {:else}
-                        <input
-                                type="text"
-                                id="{sectionKey}-{key}"
-                                name="{sectionKey}-{key}"
-                                value={value}
-                        />
-                    {/if}
+                    </div>
                 </div>
             {/each}
         </fieldset>
@@ -153,7 +158,27 @@
     }
 
     .form-group {
-        margin-bottom: 5px;
+        margin-bottom: 15px;
+    }
+
+    .form-group-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .input-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-container input:not([type="checkbox"]) {
+        width: 100%;
+    }
+
+    .input-container input[type="checkbox"] {
+        margin: 0;
     }
 
     .multicheckbox-grouped {
