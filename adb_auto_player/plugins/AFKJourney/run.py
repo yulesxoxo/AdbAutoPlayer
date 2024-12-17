@@ -560,7 +560,16 @@ class AFKJourney(Plugin):
         return False
 
     def __handle_corrupt_creature(self) -> None:
-        ready = self.wait_for_template("ready.png")
+        count = 0
+        while True:
+            ready = self.wait_for_template("ready.png")
+            if ready is not None:
+                break
+            if count >= 3:
+                return
+            sleep(1)
+            count += 1
+
         self.device.click(*ready)
         # Sometimes people wait forever for a third to join...
         while self.find_first_template_center("assist_rewards_heart.png"):
