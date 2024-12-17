@@ -33,7 +33,8 @@ def get_device() -> AdbDevice | None:
     if global_device is None:
         try:
             global_device = adb.get_device(main_config)
-        except AdbException:
+        except Exception as e:
+            logging.error(f"{e}")
             return None
     return global_device
 

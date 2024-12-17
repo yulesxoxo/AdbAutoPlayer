@@ -17,7 +17,10 @@ def get_device(main_config: dict[str, Any]) -> AdbDevice:
         host=adb_config.get("host", "127.0.0.1"),
         port=adb_config.get("port", 5037),
     )
-    devices = client.list()
+    try:
+        devices = client.list()
+    except Exception:
+        raise AdbException("Failed to connect to AdbClient check the main_config.toml")
     if len(devices) == 0:
         logging.warning("No devices found")
     else:
@@ -26,14 +29,30 @@ def get_device(main_config: dict[str, Any]) -> AdbDevice:
             devices_str += f"\n{device_info.serial}"
         logging.info(devices_str)
 
-    device = client.device(f"{device_id}")
+    device = __connect_to_device(client, device_id)
+    if device is None and len(devices) == 1:
+        only_available_device = devices[0].serial
+        logging.warning(
+            f"{device_id} not found connecting to "
+            f" only available device: {only_available_device}"
+        )
+        device = __connect_to_device(client, only_available_device)
 
     if device is None:
         raise AdbException(f"{device_id} not found")
 
-    device.get_state()
     logging.info(f"Successfully connected to device {device_id}")
     return device
+
+
+def __connect_to_device(client: AdbClient, device_id: str) -> AdbDevice | None:
+    device = client.device(f"{device_id}")
+    try:
+        device.get_state()
+        return device
+    except Exception as e:
+        logging.debug(f"{e}")
+        return None
 
 
 def get_devices(main_config: dict[str, Any]) -> list[AdbDeviceInfo]:
