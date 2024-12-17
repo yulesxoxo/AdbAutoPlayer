@@ -407,7 +407,10 @@ class AFKJourney(Plugin):
         self.store[self.STORE_SEASON] = season
         self.store[self.STORE_MODE] = self.MODE_AFK_STAGES
 
-        self.__start_afk_stage()
+        try:
+            self.__start_afk_stage()
+        except TimeoutException as e:
+            logging.warning(f"{e}")
         if push_both_modes:
             self.store[self.STORE_SEASON] = not season
             self.__start_afk_stage()
