@@ -5,23 +5,22 @@
         onConfigSave
     } = $props();
 
-    // Previous script remains unchanged
-    const configSections = Object.entries(config)
+    const configSections : Array<Dictionary<any>> = Object.entries(config)
         .filter(([key]) => key !== 'plugin')
         .map(([sectionKey, sectionConfig]) => ({
             sectionKey,
             sectionConfig
         }));
 
-    function getInputType(key: string, value: any): string {
+    function getInputType(value: any): string {
         if (typeof value === 'boolean') return 'checkbox';
         if (typeof value === 'number') return 'number';
         if (Array.isArray(value)) return 'multicheckbox';
         return 'text';
     }
 
-    function groupOptionsByFirstLetter(options: string[]) {
-        return options.reduce((acc, option) => {
+    function groupOptionsByFirstLetter(options: string[]): Record<string, string[]> {
+        return options.reduce((acc: Record<string, string[]>, option: string) => {
             const firstLetter = option.charAt(0).toUpperCase();
             if (!acc[firstLetter]) {
                 acc[firstLetter] = [];
@@ -32,20 +31,13 @@
     }
 
     function handleSave() {
-        // Previous handleSave method remains unchanged
         const formElement = document.querySelector('form.config-form') as HTMLFormElement;
         const formData = new FormData(formElement);
-
-        interface Dictionary<T> {
-            [Key: string]: T;
-        }
         const newConfig: { [key: string]: Dictionary<any> } = JSON.parse(JSON.stringify(config));
 
-        // Iterate through each section
         for (const [sectionKey, sectionConfig] of Object.entries(newConfig)) {
             if (sectionKey === 'plugin') continue;
 
-            // Iterate through each config key in the section
             for (const key of Object.keys(sectionConfig)) {
                 const inputName = `${sectionKey}-${key}`;
                 const inputValues = formData.getAll(inputName);
@@ -68,34 +60,39 @@
             }
         }
 
-        window.eel?.save_config(newConfig);
+        window.eel.save_config(newConfig);
         onConfigSave?.();
+    }
+
+    function formatSectionKey(sectionKey: string): string {
+        const withSpaces = sectionKey.replace(/_/g, ' ');
+        return withSpaces.replace(/\b\w/g, (match) => match.toUpperCase());
     }
 </script>
 
 <form class="config-form">
     <h2>Edit Game Config</h2>
 
-    {#each configSections as { sectionKey, sectionConfig }}
+    {#each configSections as { sectionKey, sectionConfig } }
         <fieldset>
-            <legend>{sectionKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</legend>
+            <legend>{formatSectionKey(sectionKey)}</legend>
 
             {#each Object.entries(sectionConfig) as [key, value]}
                 <div class="form-group">
                     <div class="form-group-inner">
                         <label for="{sectionKey}-{key}">
-                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            {formatSectionKey(key)}
                         </label>
 
                         <div class="input-container">
-                            {#if getInputType(key, value) === 'checkbox'}
+                            {#if getInputType(value) === 'checkbox'}
                                 <input
                                         type="checkbox"
                                         id="{sectionKey}-{key}"
                                         name="{sectionKey}-{key}"
-                                        checked={value}
+                                        checked={Boolean(value)}
                                 />
-                            {:else if getInputType(key, value) === 'number'}
+                            {:else if getInputType(value) === 'number'}
                                 <input
                                         type="number"
                                         id="{sectionKey}-{key}"
@@ -103,7 +100,7 @@
                                         value={value}
                                         min="1"
                                 />
-                            {:else if getInputType(key, value) === 'multicheckbox'}
+                            {:else if getInputType(value) === 'multicheckbox'}
                                 {@const groupedOptions = groupOptionsByFirstLetter(choices[sectionKey]?.[key] || [])}
                                 <div class="multicheckbox-grouped">
                                     {#each Object.entries(groupedOptions) as [letter, options]}
@@ -116,7 +113,9 @@
                                                                 type="checkbox"
                                                                 name="{sectionKey}-{key}"
                                                                 value={option}
-                                                                checked={value.includes(option)}
+                                                                checked={
+                                                                    Array.isArray(value) ? value.includes(option) : false
+                                                                }
                                                         />
                                                         {option}
                                                     </label>
@@ -167,9 +166,8 @@
         justify-content: space-between;
     }
 
-    /* Specifically target labels for non-multicheckbox inputs */
     .form-group:not(:has(.multicheckbox-grouped)) .form-group-inner label {
-        flex: 0 0 200px; /* Fixed width for labels */
+        flex: 0 0 200px;
         margin-right: 10px;
         text-align: right;
     }

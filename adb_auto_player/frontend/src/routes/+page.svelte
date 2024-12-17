@@ -36,7 +36,7 @@
     window.eel.expose(append_to_log);
 
     function updateMenu() {
-        window.eel?.get_menu()((response: string[] | null) => {
+        window.eel.get_menu()((response: string[] | null) => {
             if (JSON.stringify(games) !== JSON.stringify(response)) {
                 games = response;
 
@@ -51,11 +51,11 @@
 
     function updateState() {
         if (disableActions) {
-            window.eel?.action_is_running()((response: boolean) => {
+            window.eel.action_is_running()((response: boolean) => {
                 disableActions = response;
             })
         } else {
-            window.eel?.get_running_supported_game()((response: null | string) => {
+            window.eel.get_running_supported_game()((response: null | string) => {
                 if (game !== response) {
                     game = response;
                     updateMenu();
@@ -78,17 +78,17 @@
             }));
         }
         disableActions = true;
-        window.eel?.execute(index);
+        window.eel.execute(index);
     }
 
     function stopAction(event: Event) {
         event.preventDefault();
-        window.eel?.stop_action();
+        window.eel.stop_action();
     }
 
     function openGameConfigForm(event: Event) {
         event.preventDefault();
-        window.eel?.get_editable_config()((response: any) => {
+        window.eel.get_editable_config()((response: any) => {
             editableConfig = response.config;
             configChoices = response.choices;
             showConfigForm = true;
@@ -97,7 +97,7 @@
 
     function reloadConfig(event: Event) {
         event.preventDefault();
-        window.eel?.reload_config();
+        window.eel.reload_config();
     }
 
     function onConfigSave() {
