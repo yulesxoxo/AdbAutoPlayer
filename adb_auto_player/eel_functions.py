@@ -121,7 +121,7 @@ def save_config(new_config: dict[str, Any]) -> None:
         return None
     plugin_loader.save_config_for_plugin(new_config, str(plugin.get("dir")))
     logging.info("Config saved.")
-    global_plugin = None
+    global_plugin = get_plugin()
     return None
 
 
