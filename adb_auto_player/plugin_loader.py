@@ -43,10 +43,10 @@ def scan_plugins() -> list[dict[str, Any]]:
 
         if config:
             plugin_config = config.get("plugin", {})
-            package = plugin_config.get("package")
+            packages = plugin_config.get("packages")
             name = plugin_config.get("name")
             plugin = {
-                "package": package,
+                "packages": packages,
                 "name": name,
                 "dir": plugin_dir_name,
             }
@@ -129,6 +129,6 @@ def get_plugin_for_app(
     plugins: list[dict[str, Any]], app: str
 ) -> dict[str, Any] | None:
     for plugin in plugins:
-        if plugin.get("package") == app:
+        if app in plugin.get("packages", {}):
             return plugin
     return None

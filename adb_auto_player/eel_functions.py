@@ -50,7 +50,7 @@ def get_plugin() -> dict[str, Any] | None:
     except AdbException:
         return None
     if global_plugin is not None:
-        if app != global_plugin.get("package"):
+        if app not in global_plugin.get("packages", {}):
             global_plugin = None
             menu_options = None
 
