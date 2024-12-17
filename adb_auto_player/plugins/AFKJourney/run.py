@@ -552,21 +552,20 @@ class AFKJourney(Plugin):
         match template:
             case "join_now.png":
                 logging.info("Battling Corrupt Creature")
-                self.__handle_corrupt_creature()
-                return True
+                return self.__handle_corrupt_creature()
             case "synergy.png":
                 logging.info("Synergy")
                 return self.__handle_synergy()
         return False
 
-    def __handle_corrupt_creature(self) -> None:
+    def __handle_corrupt_creature(self) -> bool:
         count = 0
         while True:
             ready = self.wait_for_template("ready.png")
             if ready is not None:
                 break
             if count >= 3:
-                return
+                return False
             sleep(1)
             count += 1
 
@@ -589,7 +588,7 @@ class AFKJourney(Plugin):
         self.wait_for_template("assist_reward.png")
         logging.info("Corrupt Creature done")
         self.press_back_button()
-        return None
+        return True
 
     def __handle_synergy(self) -> bool:
         go = self.find_first_template_center("go.png")
