@@ -33,7 +33,7 @@ def get_device(main_config: dict[str, Any]) -> AdbDevice:
     if device is None and len(devices) == 1:
         only_available_device = devices[0].serial
         logging.warning(
-            f"{device_id} not found connecting to "
+            f"{device_id} not found connecting to"
             f" only available device: {only_available_device}"
         )
         device = __connect_to_device(client, only_available_device)
