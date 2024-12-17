@@ -1,10 +1,15 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import CommandPanel from "./CommandPanel.svelte";
+    import ConfigForm from "./ConfigForm.svelte";
 
     let disableActions = false;
     let game: string | null = null;
     let games: string[] | null = null;
     let buttons: { label: string, index: number, active: boolean }[] = [];
+    let editableConfig: any = null;
+    let configChoices: any = null;
+    let showConfigForm = false;
 
     function append_to_log(message: string) {
         const log = document.getElementById('log') as HTMLDivElement | null;
@@ -59,8 +64,10 @@
         }
     }
 
-    updateState();
-    setInterval(updateState, 3000);
+    onMount(() => {
+        updateState();
+        setInterval(updateState, 3000);
+    });
 
     function executeMenuItem(event: Event, index: number) {
         event.preventDefault();
@@ -75,39 +82,60 @@
     }
 
     function stopAction(event: Event) {
-        event.preventDefault()
-        window.eel?.stop_action()
+        event.preventDefault();
+        window.eel?.stop_action();
+    }
+
+    function openGameConfigForm(event: Event) {
+        event.preventDefault();
+        window.eel?.get_editable_config()((response: any) => {
+            editableConfig = response.config;
+            configChoices = response.choices;
+            showConfigForm = true;
+        });
     }
 
     function reloadConfig(event: Event) {
-        event.preventDefault()
-        window.eel?.reload_config()
+        event.preventDefault();
+        window.eel?.reload_config();
+    }
+
+    function onConfigSave() {
+        showConfigForm = false;
     }
 </script>
 
 <main class="container">
     <h1>{game ? game : "Please start a supported game"}</h1>
 
-    <CommandPanel title={"Menu"}>
-        {#if buttons.length > 0}
-            {#each buttons as { label, index, active }}
-                <button
-                        disabled={disableActions}
-                        class:active={active}
-                        on:click={(event) => executeMenuItem(event, index)}
-                >
-                    {label}
-                </button>
-            {/each}
+    {#if showConfigForm}
+        <ConfigForm config={editableConfig} choices={configChoices} onConfigSave={onConfigSave} />
+    {:else}
+        <CommandPanel title={"Menu"}>
+            {#if buttons.length > 0}
+                {#each buttons as { label, index, active }}
+                    <button
+                            disabled={disableActions}
+                            class:active={active}
+                            on:click={(event) => executeMenuItem(event, index)}
+                    >
+                        {label}
+                    </button>
+                {/each}
                 <button on:click={(event) => stopAction(event)}>
                     Stop Action
                 </button>
-        {:else}
-            <button on:click={(event) => reloadConfig(event)}>
-                Reload main_config.toml
-            </button>
-        {/if}
-    </CommandPanel>
+                <button on:click={(event) => openGameConfigForm(event)}>
+                    Edit Game Config
+                </button>
+            {:else}
+                <button on:click={(event) => reloadConfig(event)}>
+                    Reload main_config.toml
+                </button>
+            {/if}
+        </CommandPanel>
+    {/if}
+
     <CommandPanel title={"Logs"}>
         <div id="log" class="log-container"></div>
     </CommandPanel>
@@ -146,7 +174,6 @@
     button:disabled.active {
         opacity: 1;
         outline: 2px solid #396cd8;
-
     }
 
     button:disabled {

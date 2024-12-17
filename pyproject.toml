@@ -12,6 +12,7 @@ pillow = "^11.0.0"
 adbutils = "^2.8.0"
 opencv-python = "^4.10.0.84"
 eel = "^0.18.1"
+toml = "^0.10.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.10.0"

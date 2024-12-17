@@ -20,6 +20,70 @@ class AFKJourney(Plugin):
     CONFIG_AFK_STAGES: str = "afk_stages"
     CONFIG_DURAS_TRIALS: str = "duras_trials"
 
+    EXCLUDED_HEROES_CHOICES: list[str] = [
+        "Alsa",
+        "Antandra",
+        "Arden",
+        "Atalanta",
+        "Berial",
+        "Brutus",
+        "Bryon",
+        "Carolina",
+        "Cassadee",
+        "Cecia",
+        "Damian",
+        "Dionel",
+        "Dunlingr",
+        "Eironn",
+        "Fae",
+        "Florabelle",
+        "Granny Dahnie",
+        "Harak",
+        "Hewynn",
+        "Hodgkin",
+        "Igor",
+        "Kafra",
+        "Koko",
+        "Korin",
+        "Kruger",
+        "Lenya",
+        "Lily May",
+        "Lucca",
+        "Lucius",
+        "Ludovic",
+        "Lumont",
+        "Lyca",
+        "Marilee",
+        "Mikola",
+        "Mirael",
+        "Nara",
+        "Niru",
+        "Odie",
+        "Phraesto",
+        "Reinier",
+        "Rhys",
+        "Rowan",
+        "Salazer",
+        "Satrana",
+        "Scarlita",
+        "Seth",
+        "Shakir",
+        "Silvina",
+        "Sinbad",
+        "Smokey",
+        "Sonja",
+        "Soren",
+        "Talene",
+        "Tasi",
+        "Temesia",
+        "Thoran",
+        "Ulmus",
+        "Vala",
+        "Valen",
+        "Viperian",
+        "Walker",
+    ]
+
     def get_template_dir_path(self) -> str:
         return os.path.join(get_plugins_dir(), "AFKJourney", "templates")
 
@@ -62,6 +126,11 @@ class AFKJourney(Plugin):
             #    "kwargs": {},
             # },
         ]
+
+    def get_config_choices(self) -> dict[str, Any]:
+        return {
+            "general": {"excluded_heroes": self.EXCLUDED_HEROES_CHOICES},
+        }
 
     def get_general_config(self) -> tuple[list[str], int]:
         config = self.config.get(self.CONFIG_GENERAL, {})

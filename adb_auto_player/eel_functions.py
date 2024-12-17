@@ -76,10 +76,19 @@ def get_game_object() -> Plugin | None:
     except Exception as e:
         logging.error(f"{e}")
     classes = [cls for name, cls in inspect.getmembers(module, inspect.isclass)]
+    game = None
     for cls in classes:
         if issubclass(cls, Plugin) and cls is not Plugin:
-            return cls(device, main_config)
+            config = plugin_loader.load_config(str(plugin.get("dir")))
+            if config is not None:
+                game = cls(device, config)
 
+    if game is not None:
+        try:
+            game.check_requirements()
+            return game
+        except Exception as e:
+            logging.error(f"{e}")
     return None
 
 
@@ -89,6 +98,30 @@ def get_running_supported_game() -> str | None:
     if plugin is None:
         return None
     return plugin.get("name")
+
+
+@eel.expose
+def get_editable_config() -> dict[str, Any] | None:
+    game = get_game_object()
+    if game is None:
+        return None
+    return {"config": game.config, "choices": game.get_config_choices()}
+
+
+@eel.expose
+def save_config(new_config: dict[str, Any]) -> None:
+    global global_plugin
+    plugin = global_plugin
+    if plugin is None:
+        logging.error("Error saving config keep the game running when changing config.")
+        return None
+    if str(plugin.get("name")) != str(new_config.get("plugin", {}).get("name")):
+        logging.error("Error saving config keep the game running when changing config.")
+        return None
+    plugin_loader.save_config_for_plugin(new_config, str(plugin.get("dir")))
+    logging.info("Config saved.")
+    global_plugin = None
+    return None
 
 
 @eel.expose

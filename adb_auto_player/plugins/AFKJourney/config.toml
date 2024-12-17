@@ -1,28 +1,5 @@
 [general]
-excluded_heroes = [
-    #Hashtag before the name "comments out" the line so it is not applied.
-    #"Alsa", "Antandra", "Arden", "Atalanta",
-    #"Berial", "Brutus", "Bryon",
-    #"Carolina", "Cassadee", "Cecia",
-    #"Damian", "Dionel", "Dunlingr",
-    #"Eironn",
-    #"Fae", "Florabelle",
-    #"Granny Dahnie",
-    #"Harak", "Hewynn", "Hodgkin",
-    #"Igor",
-    #"Kafra", "Koko", "Korin", "Kruger",
-    #"Lenya", "Lily May", "Lucca", "Lucius", "Ludovic", "Lumont", "Lyca",
-    #"Marilee", "Mikola", "Mirael",
-    #"Nara", "Niru",
-    #"Odie",
-    #"Phraesto",
-    #"Reinier", "Rhys", "Rowan",
-    #"Salazer", "Satrana", "Scarlita", "Seth", "Shakir", "Silvina", "Sinbad", "Smokey", "Sonja", "Soren",
-    #"Talene", "Tasi", "Temesia", "Thoran",
-    #"Ulmus",
-    #"Vala", "Valen", "Viperian",
-    #"Walker",
-]
+excluded_heroes = []
 assist_limit = 20
 
 [afk_stages]
@@ -32,16 +9,13 @@ use_suggested_formations = true
 push_both_modes = true
 
 [duras_trials]
-attempts = 2
+attempts = 5
 formations = 7
 use_suggested_formations = true
 spend_gold = false
 
 [plugin]
-name = 'AFK Journey'
-packages = [
-    'com.farlightgames.igame.gp',
-    'com.farlightgames.igame.gp.vn'
-]
-supported_resolution = '1080x1920'
+name = "AFK Journey"
+packages = [ "com.farlightgames.igame.gp", "com.farlightgames.igame.gp.vn",]
+supported_resolution = "1080x1920"
 min_adb_auto_player_version = "0.1.2"

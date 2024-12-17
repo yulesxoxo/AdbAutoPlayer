@@ -22,6 +22,10 @@ class Plugin:
         return ""
 
     @abstractmethod
+    def get_config_choices(self) -> dict[str, Any]:
+        return {}
+
+    @abstractmethod
     def get_menu_options(self) -> list[dict[str, Any]]:
         return []
 

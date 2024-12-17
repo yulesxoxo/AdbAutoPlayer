@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import tomllib
+import toml
 import types
 from typing import Any, cast
 
@@ -17,7 +18,7 @@ MAIN_CONFIG_FILE = "main_config.toml"
 def get_plugins_dir() -> str:
     if getattr(sys, "frozen", False):
         return os.path.join(os.path.dirname(sys.executable), "plugins")
-    return "./plugins"
+    return "plugins"
 
 
 def get_plugin_list_file_location() -> str:
@@ -92,13 +93,19 @@ def create_plugin_list_file(plugins: list[dict[str, Any]]) -> None:
         json.dump(plugin_data, f, indent=4)
 
 
-def load_config(plugin_name: str) -> dict[str, Any] | None:
-    config_file = os.path.join(get_plugins_dir(), plugin_name, PLUGIN_CONFIG_FILE)
-    # macOS likes to create .DS_Store files
+def load_config(plugin_dir: str) -> dict[str, Any] | None:
+    config_file = os.path.join(get_plugins_dir(), plugin_dir, PLUGIN_CONFIG_FILE)
     if not os.path.exists(config_file):
         return None
     with open(config_file, "rb") as f:
         return tomllib.load(f)
+
+
+def save_config_for_plugin(config: dict[str, Any], plugin_dir: str) -> None:
+    config_file = os.path.join(get_plugins_dir(), plugin_dir, PLUGIN_CONFIG_FILE)
+    os.makedirs(os.path.dirname(config_file), exist_ok=True)
+    with open(config_file, "w") as f:
+        toml.dump(config, f)
 
 
 def load_plugin_module(plugin_name: str) -> types.ModuleType:
