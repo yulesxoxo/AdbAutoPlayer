@@ -114,8 +114,7 @@
         <CommandPanel title={"Menu"}>
             {#if buttons.length > 0}
                 {#each buttons as { label, index, active }}
-                    <button
-                            disabled={disableActions}
+                    <button disabled={disableActions}
                             class:active={active}
                             on:click={(event) => executeMenuItem(event, index)}
                     >
@@ -125,7 +124,9 @@
                 <button on:click={(event) => stopAction(event)}>
                     Stop Action
                 </button>
-                <button on:click={(event) => openGameConfigForm(event)}>
+                <button disabled={disableActions}
+                        on:click={(event) => openGameConfigForm(event)}
+                >
                     Edit Game Config
                 </button>
             {:else}
