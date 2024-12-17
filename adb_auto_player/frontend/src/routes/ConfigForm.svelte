@@ -20,6 +20,17 @@
         return 'text';
     }
 
+    function groupOptionsByFirstLetter(options: string[]) {
+        return options.reduce((acc, option) => {
+            const firstLetter = option.charAt(0).toUpperCase();
+            if (!acc[firstLetter]) {
+                acc[firstLetter] = [];
+            }
+            acc[firstLetter].push(option);
+            return acc;
+        }, {});
+    }
+
     function handleSave() {
         const formElement = document.querySelector('form.config-form') as HTMLFormElement;
         const formData = new FormData(formElement);
@@ -90,17 +101,25 @@
                                 min="1"
                         />
                     {:else if getInputType(key, value) === 'multicheckbox'}
-                        <div class="multicheckbox-group">
-                            {#each (choices[sectionKey]?.[key] || []) as option}
-                                <label class="checkbox-container">
-                                    <input
-                                            type="checkbox"
-                                            name="{sectionKey}-{key}"
-                                            value={option}
-                                            checked={value.includes(option)}
-                                    />
-                                    {option}
-                                </label>
+                        {@const groupedOptions = groupOptionsByFirstLetter(choices[sectionKey]?.[key] || [])}
+                        <div class="multicheckbox-grouped">
+                            {#each Object.entries(groupedOptions) as [letter, options]}
+                                <div class="letter-group">
+                                    <div class="letter-header">{letter}</div>
+                                    <div class="letter-options">
+                                        {#each options as option}
+                                            <label class="checkbox-container">
+                                                <input
+                                                        type="checkbox"
+                                                        name="{sectionKey}-{key}"
+                                                        value={option}
+                                                        checked={value.includes(option)}
+                                                />
+                                                {option}
+                                            </label>
+                                        {/each}
+                                    </div>
+                                </div>
                             {/each}
                         </div>
                     {:else}
@@ -131,5 +150,40 @@
         background-color: rgba(31, 31, 31, 0.8);
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 5px;
+    }
+
+    .multicheckbox-grouped {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .letter-group {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        padding: 5px;
+    }
+
+    .letter-header {
+        font-weight: bold;
+        margin-bottom: 5px;
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 2px;
+    }
+
+    .letter-options {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        margin: 2px 0;
     }
 </style>
