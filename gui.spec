@@ -3,7 +3,7 @@
 
 a = Analysis(
     ['adb_auto_player\\eel_main.py'],
-    pathex=['adb_auto_player'],
+    pathex=[],
     binaries=[],
     datas=[
         ('pyproject.toml', '.'),
