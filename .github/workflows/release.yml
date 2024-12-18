@@ -14,12 +14,12 @@ jobs:
         include:
           - os: windows-latest
             zip_files: "AdbAutoPlayer_Windows.zip"
-            gui_zip_command: "Compress-Archive -Path .\\dist\\* -DestinationPath AdbAutoPlayer_Windows.zip"
+            gui_zip_command: "Compress-Archive -Path .\\dist\\AdbAutoPlayer\\* -DestinationPath AdbAutoPlayer_Windows.zip"
           - os: macos-latest
             zip_files: "AdbAutoPlayer_MacOS.zip"
             gui_zip_command: |
-              cd dist
-              zip -r ../AdbAutoPlayer_MacOS.zip .
+              cd dist/AdbAutoPlayer
+              zip -r ../../AdbAutoPlayer_MacOS.zip .
 
     permissions:
       contents: write
@@ -56,8 +56,8 @@ jobs:
       run: |
         poetry install
         poetry run pyinstaller --clean gui.spec
-        cp adb_auto_player/main_config.toml dist
-        cp -r adb_auto_player/plugins dist/
+        cp adb_auto_player/main_config.toml dist/AdbAutoPlayer
+        cp -r adb_auto_player/plugins dist/AdbAutoPlayer/
 
     - name: Zip the GUI dist directory
       run: ${{ matrix.gui_zip_command }}
