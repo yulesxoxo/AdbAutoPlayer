@@ -18,6 +18,7 @@ declare global {
             set_host(host: string): void;
             _websocket: WebSocket;
         };
+        imageIsActive: (active: boolean) => void;
     }
 
     interface Dictionary<T> {

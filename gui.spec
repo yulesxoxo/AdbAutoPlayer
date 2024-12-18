@@ -42,7 +42,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['koko.ico'],
+    icon=['favicon.ico'],
 )
 coll = COLLECT(
     exe,

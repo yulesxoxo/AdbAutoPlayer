@@ -3,13 +3,16 @@
     import CommandPanel from "./CommandPanel.svelte";
     import ConfigForm from "./ConfigForm.svelte";
 
-    let disableActions = false;
-    let game: string | null = null;
-    let games: string[] | null = null;
-    let buttons: { label: string, index: number, active: boolean }[] = [];
-    let editableConfig: any = null;
-    let configChoices: any = null;
-    let showConfigForm = false;
+    let disableActions = $state(false);
+    $effect(() => {
+        window.imageIsActive(!disableActions);
+    });
+    let game: string | null = $state(null);
+    let games: string[] | null = $state(null);
+    let buttons: { label: string, index: number, active: boolean }[] = $state([]);
+    let editableConfig: any = $state(null);
+    let configChoices: any = $state(null);
+    let showConfigForm = $state(false);
 
     function append_to_log(message: string) {
         const log = document.getElementById('log') as HTMLDivElement | null;
@@ -116,21 +119,21 @@
                 {#each buttons as { label, index, active }}
                     <button disabled={disableActions}
                             class:active={active}
-                            on:click={(event) => executeMenuItem(event, index)}
+                            onclick={(event) => executeMenuItem(event, index)}
                     >
                         {label}
                     </button>
                 {/each}
-                <button on:click={(event) => stopAction(event)}>
+                <button onclick={(event) => stopAction(event)}>
                     Stop Action
                 </button>
                 <button disabled={disableActions}
-                        on:click={(event) => openGameConfigForm(event)}
+                        onclick={(event) => openGameConfigForm(event)}
                 >
                     Edit Game Config
                 </button>
             {:else}
-                <button on:click={(event) => reloadConfig(event)}>
+                <button onclick={(event) => reloadConfig(event)}>
                     Reload main_config.toml
                 </button>
             {/if}

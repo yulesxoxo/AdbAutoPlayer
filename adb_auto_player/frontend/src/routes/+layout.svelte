@@ -41,6 +41,11 @@
     }
 
     setInterval(monitorWebSocket, 3000);
+
+    let imageActive: boolean = $state(true);
+    window.imageIsActive = (active: boolean) => {
+        imageActive = active;
+    };
 </script>
 
 {@render children()}
@@ -51,7 +56,7 @@
     </a>
 </div>
 <div class="logo-sticky">
-    <img src="/images/3583083.png" alt="uwu" draggable="false"/>
+    <img src={imageActive ? '/images/3583082.png' : '/images/3583083.png'} alt="uwu" draggable="false" />
 </div>
 
 <style>
