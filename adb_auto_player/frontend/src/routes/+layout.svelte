@@ -28,12 +28,15 @@
     }
 
     function monitorWebSocket() {
-        if (window.eel._websocket) {
+        if (window.eel?._websocket) {
             const state = window.eel._websocket.readyState;
             if (state === WebSocket.CLOSED && !webSocketClosed) {
                 webSocketClosed = true;
                 onWebSocketClosed();
             }
+        } else if (!webSocketClosed) {
+            webSocketClosed = true;
+            onWebSocketClosed();
         }
     }
 
