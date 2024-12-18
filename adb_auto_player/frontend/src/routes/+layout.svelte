@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
     });
@@ -10,13 +10,34 @@
         }
     });
 
-    window.addEventListener('beforeunload', function(event) {
-        event.preventDefault();
-    });
-
     window.addEventListener('onunload', async function () {
         window.eel.shutdown()
     });
+
+    const beforeUnloadListener = function(event: Event) {
+        event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', beforeUnloadListener);
+
+    let webSocketClosed = false;
+    function onWebSocketClosed() {
+        window.removeEventListener('beforeunload', beforeUnloadListener);
+        alert("The connection has been lost. App needs to be restarted.");
+        window.close()
+    }
+
+    function monitorWebSocket() {
+        if (window.eel._websocket) {
+            const state = window.eel._websocket.readyState;
+            if (state === WebSocket.CLOSED && !webSocketClosed) {
+                webSocketClosed = true;
+                onWebSocketClosed();
+            }
+        }
+    }
+
+    setInterval(monitorWebSocket, 3000);
 </script>
 
 {@render children()}

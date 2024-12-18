@@ -16,6 +16,7 @@ declare global {
             reload_config: () => void;
             save_config: (config: { [p: string]: Dictionary<any> }) => void;
             set_host(host: string): void;
+            _websocket: WebSocket;
         };
     }
 
