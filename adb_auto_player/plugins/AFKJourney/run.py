@@ -623,17 +623,20 @@ class AFKJourney(Plugin):
         match template:
             case "join_now.png":
                 logging.info("Battling Corrupt Creature")
-                return self.__handle_corrupt_creature()
+                try:
+                    return self.__handle_corrupt_creature()
+                except TimeoutException:
+                    logging.warning(
+                        "Something went wrong when trying to battle Corrupt Creature"
+                    )
+                    return False
             case "synergy.png":
                 logging.info("Synergy")
                 return self.__handle_synergy()
         return False
 
     def __handle_corrupt_creature(self) -> bool:
-        try:
-            ready = self.wait_for_template("ready.png")
-        except TimeoutException:
-            return False
+        ready = self.wait_for_template("ready.png")
 
         self.device.click(*ready)
         # Sometimes people wait forever for a third to join...
