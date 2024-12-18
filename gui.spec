@@ -2,12 +2,12 @@
 
 
 a = Analysis(
-    ['adb_auto_player\\eel_main.py'],
-    pathex=[],
+    ['adb_auto_player/eel_main.py'],
+    pathex=['adb_auto_player'],
     binaries=[],
     datas=[
         ('pyproject.toml', '.'),
-        ('adb_auto_player\\frontend\\build', '.\\frontend\\build')
+        ('adb_auto_player/frontend/build', './frontend/build')
     ],
     hiddenimports=[
         'adb_auto_player.plugin',
